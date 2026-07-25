@@ -298,6 +298,20 @@ document.addEventListener('DOMContentLoaded', async function() {
     const resourceScript = '<script>window.__resources = ' +
       JSON.stringify(resourceMap).replace(/<\//g, '<\\/') +
       ';</' + 'script>';
+    const foucGuard =
+      '<style>html.__orca-boot{background:#2f3b2f !important}' +
+      'html.__orca-boot body{visibility:hidden !important}</' + 'style>' +
+      '<script>(function(){' +
+      'var h=document.documentElement,done=false;' +
+      'h.classList.add("__orca-boot");' +
+      'function reveal(){if(done)return;done=true;h.classList.remove("__orca-boot");}' +
+      'function ready(){var b=document.body;' +
+      'return b&&b.firstElementChild&&b.textContent.indexOf("{{")===-1;}' +
+      'function tick(){if(done)return;if(ready())return reveal();' +
+      'requestAnimationFrame(tick);}' +
+      'requestAnimationFrame(tick);' +
+      'setTimeout(reveal,3000);' +
+      '})();</' + 'script>';
     // Inject after <head> so the DOCTYPE stays first; prepending the script
     // would push the parser into quirks mode. DOMParser always emits a <head>
     // (synthesizing one if the source HTML omitted it) but may carry
@@ -306,7 +320,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     const headOpen = template.match(/<head[^>]*>/i);
     if (headOpen) {
       const i = headOpen.index + headOpen[0].length;
-      template = template.slice(0, i) + resourceScript + template.slice(i);
+      template = template.slice(0, i) + resourceScript + foucGuard + template.slice(i);
     }
 
     // Parse the template and swap the root element. Scripts inserted via
