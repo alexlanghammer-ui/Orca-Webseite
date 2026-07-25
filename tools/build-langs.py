@@ -208,6 +208,13 @@ def transform(src: str, lang: str, page: str) -> str:
                f'<\\u002Fa>')
         s = re.sub(pattern, lambda _m, n=new: n, s, count=1)
 
+    # --- Startseiten-Links auf die Ordnerform bringen ---------------------
+    # Logo, "Start" in der Navigation und der Sprachumschalter zeigten auf
+    # ./index.html. Der Server liefert die Startseite auch unter dem Ordner
+    # aus, dann steht in der Adresszeile nur die Domain statt .../index.html.
+    s = re.sub(r'href=\\"((?:\.\./|\./)(?:en/|fr/)?)index\.html\\"',
+               r'href=\\"\1\\"', s)
+
     # --- Kopfbereich der Vorlage -----------------------------------------
     sub_once(f"<title>{de_title}<\\u002Ftitle>",
              f"<title>{title}<\\u002Ftitle>",
