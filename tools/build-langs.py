@@ -265,6 +265,64 @@ def transform(src: str, lang: str, page: str) -> str:
                     'rgba(10,9,7,0.82) 100%)')
         sub_once(old_grad, new_grad, "Hero-Verlauf")
 
+    if page == "About.html":
+        sub_once('<div style=\\"display:grid; '
+                 'grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:48px; '
+                 'max-width:820px; margin:0 auto;\\">',
+                 '<div class=\\"orca-leads\\" style=\\"display:grid; '
+                 'grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:48px; '
+                 'max-width:820px; margin:0 auto;\\">',
+                 "Klasse am Raster der Geschaeftsfuehrung")
+
+    # --- Kontaktformular funktionsfaehig machen ---------------------------
+    # Das Formular war reine Attrappe: kein <form>, keine name-Attribute, der
+    # Knopf ist type="button" ohne Handler. Wer etwas eintippte und auf Senden
+    # klickte, loeste nichts aus — die Anfrage war verloren.
+    # Geloest ueber eine vorbefuellte E-Mail: kein Drittanbieter, damit keine
+    # Datenweitergabe und kein Eintrag in der Datenschutzerklaerung noetig.
+    # Der Listener haengt am Dokument, damit er unabhaengig davon greift, wann
+    # der Knopf gerendert wird. Zeilenumbrueche ueber fromCharCode, um
+    # Escaping ueber die drei Ebenen hinweg zu vermeiden.
+    old_boot = 'h.classList.add("__orca-boot");'
+    new_boot = (
+        'h.classList.add("__orca-boot");'
+        'document.addEventListener("click",function(ev){try{'
+        'var b=ev.target&&ev.target.closest?ev.target.closest(".orca-send"):null;'
+        'if(!b)return;ev.preventDefault();'
+        'var g=function(c){var el=document.querySelector("."+c);'
+        'return el&&el.value?el.value.trim():"";};'
+        'var NL=String.fromCharCode(10);'
+        'var W={de:["Anfrage ueber die Website","Name","E-Mail","Fahrzeug","Nachricht"],'
+        'en:["Enquiry via the website","Name","Email","Vehicle","Message"],'
+        'fr:["Demande via le site","Nom","E-mail","Vehicule","Message"]};'
+        'var L=(document.documentElement.getAttribute("lang")||"de").substring(0,2);'
+        'var t=W[L]||W.de;'
+        'var n=g("orca-f-name"),m=g("orca-f-email"),v=g("orca-f-vehicle"),x=g("orca-f-message");'
+        'if(!n&&!m&&!x){var f=document.querySelector(".orca-f-name");if(f)f.focus();return;}'
+        'var body=t[1]+": "+n+NL+t[2]+": "+m+NL+t[3]+": "+v+NL+NL+t[4]+":"+NL+x;'
+        'var subj=t[0]+(v?" - "+v:"");'
+        'window.location.href="mailto:info@orca.gmbh?subject="+encodeURIComponent(subj)'
+        '+"&body="+encodeURIComponent(body);'
+        '}catch(err){}},true);')
+    sub_once(old_boot, new_boot, "Kontaktformular verdrahten")
+
+    if page == "Contact.html":
+        for cls, feld in (('type=\\"text\\" placeholder=\\"{{ t.fName }}\\"', 'orca-f-name'),
+                          ('type=\\"email\\" placeholder=\\"{{ t.fEmail }}\\"', 'orca-f-email'),
+                          ('type=\\"text\\" placeholder=\\"{{ t.fVehicle }}\\"', 'orca-f-vehicle')):
+            sub_once(f'<input class=\\"field\\" {cls}>',
+                     f'<input class=\\"field {feld}\\" {cls}>',
+                     f"Klasse am Feld {feld}")
+        sub_once('<textarea class=\\"field\\" rows=\\"4\\" '
+                 'placeholder=\\"{{ t.fMessage }}\\"',
+                 '<textarea class=\\"field orca-f-message\\" rows=\\"4\\" '
+                 'placeholder=\\"{{ t.fMessage }}\\"',
+                 "Klasse am Nachrichtenfeld")
+        sub_once('<button type=\\"button\\" style=\\"margin-top:10px;',
+                 '<button type=\\"button\\" class=\\"orca-send\\" '
+                 'style=\\"margin-top:10px;',
+                 "Klasse am Senden-Knopf")
+
     # Hinweis: Hier stand kurzzeitig ein Listener, der bei der
     # Systemeinstellung "Bewegung reduzieren" beide Videos anhielt. Er ist
     # entfernt worden, weil er die Videos für alle stillstehen liess, die
@@ -315,13 +373,16 @@ def transform(src: str, lang: str, page: str) -> str:
         '          flex-shrink: 1 !important; min-width: 0 !important; }\\n'
         '    section { padding-left: 22px !important; padding-right: 22px !important; }\\n'
         '    footer { padding-left: 22px !important; padding-right: 22px !important; gap: 14px 26px !important; }\\n'
-        '    /* Alle Raster einspaltig. minmax(0,1fr) statt 1fr, weil 1fr fuer\\n'
-        '       minmax(auto,1fr) steht und die Spalte damit nicht unter die\\n'
-        '       Mindestbreite ihres Inhalts schrumpfen kann. Genau daran liefen\\n'
-        '       die Portraits der Fuehrungskraefte 470px breit in ein 346px\\n'
-        '       schmales Raster, und die Kennzahlen landeten in zwei ungleichen\\n'
-        '       Spalten statt mittig. */\\n'
-        '    [style*=\\"grid-template-columns\\"] { grid-template-columns: minmax(0, 1fr) !important; }\\n'
+        '    /* Alle mehrspaltigen Raster untereinander. Bewusst als Flex-Spalte\\n'
+        '       und nicht als einspaltiges Raster: Die Zeilenhoehe wurde dort\\n'
+        '       allein aus dem Bild abgeleitet, Name und Rolle darunter zaehlten\\n'
+        '       nicht mit und ragten 70px in die naechste Zeile — die Rolle des\\n'
+        '       ersten Geschaeftsfuehrers verschwand hinter dem zweiten Bild.\\n'
+        '       Zugleich wurde aspect-ratio gegen die alte, breitere Spalte\\n'
+        '       aufgeloest, wodurch die Bilder 265 statt 195px hoch waren. Als\\n'
+        '       Flex-Spalte stimmen beide Werte, und gap bleibt erhalten — bei\\n'
+        '       display:block waeren die Abstaende verloren gegangen. */\\n'
+        '    [style*=\\"grid-template-columns\\"] { display: flex !important; flex-direction: column !important; }\\n'
         '    /* Inhalte in einspaltigen Rastern mittig und nie breiter als die Zelle. */\\n'
         '    image-slot, video, img { max-width: 100% !important; }\\n'
         '    /* Hero: Text und Schaltflaeche an den Seitenrand. */\\n'
@@ -344,10 +405,18 @@ def transform(src: str, lang: str, page: str) -> str:
         '       Scrollflaeche mit max-height:86vh — der Text war dadurch\\n'
         '       abgeschnitten und nicht erreichbar. Jetzt scrollt der Dialog\\n'
         '       als Ganzes, und die Textspalte gibt ihre Scrollflaeche ab. */\\n'
-        '    .orca-modal-overlay { padding: 14px !important; align-items: flex-start !important; }\\n'
-        '    .orca-modal { max-height: calc(100vh - 28px) !important;\\n'
-        '                  overflow-y: auto !important;\\n'
-        '                  -webkit-overflow-scrolling: touch !important; }\\n'
+        '    /* Gescrollt wird die Flaeche hinter dem Dialog, nicht der Dialog\\n'
+        '       selbst. Damit entfaellt jede Hoehenangabe in vh — und genau\\n'
+        '       daran scheiterte der erste Versuch: Auf dem iPhone meint 100vh\\n'
+        '       das Fenster ohne Adressleiste, ist also groesser als das\\n'
+        '       tatsaechlich Sichtbare. Der Dialog passte rechnerisch in seine\\n'
+        '       Begrenzung, hatte deshalb nichts zu scrollen, ragte aber unter\\n'
+        '       die Browserleiste. Die Hintergrundflaeche ist position:fixed und\\n'
+        '       damit immer genau so hoch wie der sichtbare Bereich. */\\n'
+        '    .orca-modal-overlay { padding: 14px !important; align-items: flex-start !important;\\n'
+        '                          overflow-y: auto !important;\\n'
+        '                          -webkit-overflow-scrolling: touch !important; }\\n'
+        '    .orca-modal { max-height: none !important; overflow: visible !important; }\\n'
         '    .orca-modal-media { min-height: 210px !important; }\\n'
         '    .orca-modal-text { padding: 26px 22px 34px !important;\\n'
         '                       overflow-y: visible !important; max-height: none !important; }\\n'
@@ -356,6 +425,30 @@ def transform(src: str, lang: str, page: str) -> str:
         '                        right: 22px !important; z-index: 2 !important; }\\n'
         '    h1 { white-space: normal !important; }\\n'
         '    #orca-cookie-banner { padding: 16px 18px !important; }\\n'
+        '  }\\n'
+        '  /* Reserve fuer die Kopfzeile im mittleren Bereich. Die franzoesische\\n'
+        '     Navigation ist mit 440px die breiteste (deutsch 431, englisch 411),\\n'
+        '     bei 821px Fensterbreite blieben ihr nur 15px Reserve. Das genuegt,\\n'
+        '     damit sie umbricht, solange die Schrift noch laedt und die\\n'
+        '     Ersatzschrift breiter ausfaellt. Mit kleinerem Abstand sind es\\n'
+        '     rund 40px, und alle drei Sprachen verhalten sich gleich. */\\n'
+        '  @media (min-width: 821px) and (max-width: 1080px) {\\n'
+        '    header { padding-left: 32px !important; padding-right: 32px !important; }\\n'
+        '    nav { gap: 16px !important; }\\n'
+        '  }\\n'
+        '  /* Geschaeftsfuehrung: Die Rasterzeile wurde allein aus dem Bild\\n'
+        '     abgeleitet, Name und Rolle darunter zaehlten nicht mit und ragten\\n'
+        '     70px heraus — auf dem Handy hinter das naechste Bild, auf dem\\n'
+        '     Desktop in den Abstand darunter. Mit align-items:start wird die\\n'
+        '     Zelle nicht mehr auf die falsch berechnete Zeilenhoehe gedehnt,\\n'
+        '     sondern richtet sich nach ihrem Inhalt; das Bild loest dadurch\\n'
+        '     auch sein Seitenverhaeltnis korrekt auf (217 statt 287px).\\n'
+        '     Bewusst nur hier und nicht fuer alle Raster: andere richten ihren\\n'
+        '     Inhalt absichtlich mittig aus. */\\n'
+        '  .orca-leads { align-items: start; }\\n'
+        '  @media (max-width: 820px) {\\n'
+        '    /* Als Flex-Spalte muessen die Zellen wieder volle Breite haben. */\\n'
+        '    .orca-leads { align-items: stretch !important; }\\n'
         '  }')
     sub_once(old_media, new_media, "Responsive-Regeln")
 
