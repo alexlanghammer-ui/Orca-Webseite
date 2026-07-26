@@ -184,6 +184,9 @@ def transform(src: str, lang: str, page: str) -> str:
     # --- Bildpfade: aus einem Unterordner liegt images/ eine Ebene höher ---
     if lang != "de":
         s = s.replace("'images/", "'../images/")
+        # Dasselbe für das Video im Wurzelverzeichnis.
+        s = s.replace('src=\\"./restauration.mp4\\"',
+                      'src=\\"../restauration.mp4\\"')
 
     # --- Sprachumschalter: aus Klick-Handlern werden echte Links ----------
     # Die Farbvariable heisst je Seite anders (langDeLight auf der Startseite
@@ -207,6 +210,30 @@ def transform(src: str, lang: str, page: str) -> str:
                f'color:{{{{ {colour_var} }}}};\\">{target.upper()}'
                f'<\\u002Fa>')
         s = re.sub(pattern, lambda _m, n=new: n, s, count=1)
+
+    # --- Video im Abschnitt "Restauration in Bewegung" --------------------
+    # Der Clip ist im Hochformat (720x1280) aufgenommen, der Rahmen war 16:9
+    # quer. Mit object-fit:cover wäre nur ein schmaler Streifen aus der
+    # Bildmitte sichtbar, daher ein hochformatiger Rahmen in Reel-Breite.
+    if page == "index.html":
+        old_frame = ('<div style=\\"width:100%; aspect-ratio:16/9; '
+                     'background:#1b1a17; overflow:hidden;\\">')
+        new_frame = ('<div style=\\"width:100%; max-width:330px; margin:0 auto; '
+                     'aspect-ratio:9/16; max-height:560px; background:#1b1a17; '
+                     'overflow:hidden;\\">')
+        sub_once(old_frame, new_frame, "Videorahmen")
+
+        # Autoplay verlangt muted, sonst blockiert der Browser. controls bleibt
+        # bewusst erhalten: Der Clip läuft in Schleife, und automatisch
+        # bewegte Inhalte brauchen eine Möglichkeit zum Anhalten.
+        # Die Attributwerte müssen "true" lauten — ein leerer Wert gilt der
+        # rendernden Schicht als falsch und das Attribut entfällt.
+        # poster verwies auf eine Datei, die es nicht gibt.
+        old_vid = ('<video controls=\\"\\" playsinline=\\"\\" preload=\\"metadata\\" '
+                   'poster=\\"./restauration-poster.jpg\\"')
+        new_vid = ('<video controls=\\"true\\" autoplay=\\"true\\" muted=\\"true\\" '
+                   'loop=\\"true\\" playsinline=\\"true\\" preload=\\"auto\\"')
+        sub_once(old_vid, new_vid, "video-Tag")
 
     # --- Startseiten-Links auf die Ordnerform bringen ---------------------
     # Logo, "Start" in der Navigation und der Sprachumschalter zeigten auf
