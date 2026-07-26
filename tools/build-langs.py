@@ -212,17 +212,10 @@ def transform(src: str, lang: str, page: str) -> str:
         s = re.sub(pattern, lambda _m, n=new: n, s, count=1)
 
     # --- Video im Abschnitt "Restauration in Bewegung" --------------------
-    # Der Clip ist im Hochformat (720x1280) aufgenommen, der Rahmen war 16:9
-    # quer. Mit object-fit:cover wäre nur ein schmaler Streifen aus der
-    # Bildmitte sichtbar, daher ein hochformatiger Rahmen in Reel-Breite.
+    # Der 16:9-Rahmen des Entwurfs bleibt unverändert: restauration.mp4 wurde
+    # auf 720x404 zugeschnitten (die Instagram-Fassung hatte oben und unten je
+    # 437 Zeilen schwarzen Rand im Bild) und füllt ihn damit passend aus.
     if page == "index.html":
-        old_frame = ('<div style=\\"width:100%; aspect-ratio:16/9; '
-                     'background:#1b1a17; overflow:hidden;\\">')
-        new_frame = ('<div style=\\"width:100%; max-width:330px; margin:0 auto; '
-                     'aspect-ratio:9/16; max-height:560px; background:#1b1a17; '
-                     'overflow:hidden;\\">')
-        sub_once(old_frame, new_frame, "Videorahmen")
-
         # Autoplay verlangt muted, sonst blockiert der Browser. controls bleibt
         # bewusst erhalten: Der Clip läuft in Schleife, und automatisch
         # bewegte Inhalte brauchen eine Möglichkeit zum Anhalten.
