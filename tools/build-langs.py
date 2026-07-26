@@ -21,7 +21,7 @@ import shutil
 import sys
 from pathlib import Path
 
-BASE = "https://orca.gmbh"
+BASE = "https://www.orca.gmbh"
 
 # Die Adresse, die im Export selbst steht. Sie dient nur als Suchmuster und
 # darf nicht mitgeaendert werden, wenn BASE auf eine neue Domain zeigt —
@@ -126,17 +126,20 @@ INSTAGRAM_URL = "https://www.instagram.com/orca.restoration/"
 # Eingaben an, schickt sie an info@orca.gmbh und bestätigt dem Absender den
 # Eingang. Damit ist kein Dritter mehr beteiligt — vorher lief die Übermittlung
 # über FormSubmit in den USA, ohne Auftragsverarbeitungsvertrag.
-# Die Website liegt auf GitHub Pages unter orca.gmbh, das Skript bei Strato
-# unter www.orca.gmbh; deshalb setzt es die nötigen CORS-Kopfzeilen.
-# Bewusst www und nicht formular.orca.gmbh: Das kostenlose Zertifikat des
-# Strato-Pakets (SSL Basic) gilt nur für die Domain selbst und deren
-# www-Schreibweise, nicht für beliebige Subdomains. Unter formular.orca.gmbh
-# scheiterte deshalb schon der Verbindungsaufbau
-# (ERR_SSL_VERSION_OR_CIPHER_MISMATCH), und ein Browser lässt von einer
-# verschlüsselten Seite aus keine unverschlüsselte Anfrage zu.
-# Damit www nicht als zweite Adresse der Website erscheint, leitet die
-# .htaccess dort alles außer kontakt.php auf orca.gmbh um (tools/htaccess-www).
-FORM_ENDPOINT = "https://www.orca.gmbh/kontakt.php"
+# Die Website liegt auf GitHub Pages unter www.orca.gmbh, das Skript bei Strato
+# unter orca.gmbh; deshalb setzt es die nötigen CORS-Kopfzeilen.
+# Warum diese Aufteilung: Das kostenlose Zertifikat des Strato-Pakets
+# (SSL Basic) gilt nur für orca.gmbh und die www-Schreibweise, nicht für
+# beliebige Subdomains — unter formular.orca.gmbh scheiterte schon der
+# Verbindungsaufbau (ERR_SSL_VERSION_OR_CIPHER_MISMATCH). Und ein Verzeichnis
+# lässt Strato einem Namen nur zuweisen, wenn dieser KEINEN eigenen A-Eintrag
+# hat; www erbt ohne eigenen Eintrag aber die Adresse der Hauptdomain. Damit
+# blieb für die Annahmestelle nur die Hauptdomain selbst: Sie zeigt auf den
+# Webspace, und genau für sie gilt das Zertifikat. Die Website wandert dafür
+# auf www, wofür GitHub sein eigenes Zertifikat ausstellt.
+# Die .htaccess leitet auf orca.gmbh alles außer kontakt.php auf www um
+# (tools/htaccess-www).
+FORM_ENDPOINT = "https://orca.gmbh/kontakt.php"
 
 # Instagram-Glyphe als eingebettetes SVG — kein externer Abruf, und die Farbe
 # erbt über currentColor die des umgebenden Links. Sämtliche Darstellung läuft

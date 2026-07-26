@@ -1,19 +1,25 @@
 # Gehört als ".htaccess" in das Hauptverzeichnis des Strato-Webspace.
 #
-# www.orca.gmbh zeigt auf den Webspace und dient dort nur einem Zweck: Es nimmt
-# das Kontaktformular an (kontakt.php). Die Website selbst liegt unter
-# orca.gmbh bei GitHub Pages. Wer also www aufruft, wird dorthin geschickt —
-# sonst stünde er vor einem leeren Verzeichnis.
+# Aufteilung der beiden Namen:
+#   www.orca.gmbh  -> GitHub Pages, dort liegt die Website
+#   orca.gmbh      -> dieser Webspace, hier liegt nur kontakt.php
 #
-# Die erste Bedingung begrenzt das auf den Namen www.orca.gmbh. Andere Domains,
-# die auf denselben Webspace zeigen, bleiben unberührt.
+# Grund für diese Aufteilung: Das kostenlose Strato-Zertifikat gilt für
+# orca.gmbh (und www), nicht für eigene Subdomains — und ein Verzeichnis lässt
+# Strato nur Namen ohne eigenen A-Eintrag zuweisen. Die Annahmestelle des
+# Formulars muss deshalb auf der Hauptdomain liegen.
+#
+# Wer orca.gmbh aufruft, gehört auf die Website. Alles außer kontakt.php wird
+# daher dauerhaft (301) auf www umgeleitet. Die erste Bedingung begrenzt das auf
+# genau diesen Hostnamen, damit andere Domains auf demselben Webspace
+# unberührt bleiben.
 
 <IfModule mod_rewrite.c>
 RewriteEngine On
 
-RewriteCond %{HTTP_HOST} ^www\.orca\.gmbh$ [NC]
+RewriteCond %{HTTP_HOST} ^orca\.gmbh$ [NC]
 RewriteCond %{REQUEST_URI} !^/kontakt\.php$
-RewriteRule ^(.*)$ https://orca.gmbh/$1 [R=301,L]
+RewriteRule ^(.*)$ https://www.orca.gmbh/$1 [R=301,L]
 </IfModule>
 
 # Verzeichnisinhalte nicht auflisten, falls doch einmal ein Ordner
