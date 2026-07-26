@@ -126,9 +126,17 @@ INSTAGRAM_URL = "https://www.instagram.com/orca.restoration/"
 # Eingaben an, schickt sie an info@orca.gmbh und bestätigt dem Absender den
 # Eingang. Damit ist kein Dritter mehr beteiligt — vorher lief die Übermittlung
 # über FormSubmit in den USA, ohne Auftragsverarbeitungsvertrag.
-# Die Website liegt auf GitHub Pages, das Skript auf einer eigenen Subdomain;
-# deshalb setzt es die nötigen CORS-Kopfzeilen.
-FORM_ENDPOINT = "https://formular.orca.gmbh/kontakt.php"
+# Die Website liegt auf GitHub Pages unter orca.gmbh, das Skript bei Strato
+# unter www.orca.gmbh; deshalb setzt es die nötigen CORS-Kopfzeilen.
+# Bewusst www und nicht formular.orca.gmbh: Das kostenlose Zertifikat des
+# Strato-Pakets (SSL Basic) gilt nur für die Domain selbst und deren
+# www-Schreibweise, nicht für beliebige Subdomains. Unter formular.orca.gmbh
+# scheiterte deshalb schon der Verbindungsaufbau
+# (ERR_SSL_VERSION_OR_CIPHER_MISMATCH), und ein Browser lässt von einer
+# verschlüsselten Seite aus keine unverschlüsselte Anfrage zu.
+# Damit www nicht als zweite Adresse der Website erscheint, leitet die
+# .htaccess dort alles außer kontakt.php auf orca.gmbh um (tools/htaccess-www).
+FORM_ENDPOINT = "https://www.orca.gmbh/kontakt.php"
 
 # Instagram-Glyphe als eingebettetes SVG — kein externer Abruf, und die Farbe
 # erbt über currentColor die des umgebenden Links. Sämtliche Darstellung läuft
