@@ -233,14 +233,16 @@ def transform(src: str, lang: str, page: str) -> str:
 
         # Der Verlauf über dem Hero war für ein ruhiges Standbild ausgelegt.
         # Über dem Video fiel die Überschrift bei hellem Himmel und heller
-        # Strasse teils unter den WCAG-Mindestkontrast von 3:1 (9,1 % der
-        # Pixel). Mit 0.32 an der 60-Prozent-Marke bleibt kein Pixel darunter,
-        # das Bild wird dabei nur rund 5 Prozentpunkte stärker abgedunkelt.
+        # Strasse unter den WCAG-Mindestkontrast von 3:1 — ursprünglich bei
+        # 9,1 Prozent der Pixel. Mit 0.42 an der 60-Prozent-Marke bleibt über
+        # alle Einzelbilder kein Pixel darunter. Werte von 0.32 bis 0.38
+        # liessen einen Restanteil von 0,07 bis 0,001 Prozent stehen; die
+        # zusätzliche Abdunklung bis 0.42 beträgt nur rund einen Prozentpunkt.
         old_grad = ('background:linear-gradient(180deg, rgba(10,9,7,0.45) 0%, '
                     'rgba(10,9,7,0.05) 32%, rgba(10,9,7,0.15) 60%, '
                     'rgba(10,9,7,0.78) 100%)')
         new_grad = ('background:linear-gradient(180deg, rgba(10,9,7,0.45) 0%, '
-                    'rgba(10,9,7,0.05) 32%, rgba(10,9,7,0.32) 60%, '
+                    'rgba(10,9,7,0.05) 32%, rgba(10,9,7,0.42) 60%, '
                     'rgba(10,9,7,0.82) 100%)')
         sub_once(old_grad, new_grad, "Hero-Verlauf")
 
