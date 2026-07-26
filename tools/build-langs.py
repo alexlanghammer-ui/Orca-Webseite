@@ -138,6 +138,111 @@ INSTA_ICON = (
 )
 
 
+# Datenschutzerklärung. Jede Aussage hier ist am fertigen Stand nachgemessen:
+# ohne Zustimmung stellt keine der fünf Seiten eine Verbindung nach draussen her
+# (Schriften liegen eingebettet vor), die Karte lädt erst nach Zustimmung, und
+# die Entscheidung liegt im lokalen Speicher unter orca-cookie-consent.
+# Bewusst keine Angabe erfundener Firmendaten: Betreiber und Anschrift von
+# FormSubmit liessen sich nicht verifizieren, daher nur Dienst und Sitzland.
+DATENSCHUTZ = [
+    ("Verantwortlicher", [
+        "Verantwortlich für die Datenverarbeitung auf dieser Website ist die "
+        "ORCA Restoration GmbH, Robert-Bosch-Str. 4, 71735 Eberdingen, "
+        "Telefon 07042 374 32 67, E-Mail info@orca.gmbh.",
+    ]),
+    ("Hosting und Server-Logdateien", [
+        "Diese Website wird bei GitHub Pages gehostet, einem Dienst der "
+        "GitHub, Inc. mit Sitz in den USA. Beim Aufruf der Seiten erfasst der "
+        "Server automatisch Zugriffsdaten, darunter die IP-Adresse, Datum und "
+        "Uhrzeit des Zugriffs, die aufgerufene Seite sowie Angaben zu Browser "
+        "und Betriebssystem.",
+        "Diese Verarbeitung ist technisch erforderlich, um die Website "
+        "bereitzustellen und ihren Betrieb abzusichern. Rechtsgrundlage ist "
+        "Art. 6 Abs. 1 lit. f DSGVO. Eine Übermittlung in die USA ist dabei "
+        "nicht ausgeschlossen.",
+    ]),
+    ("Keine Analyse- und Trackingdienste", [
+        "Diese Website verwendet keine Analyse-, Werbe- oder Trackingdienste. "
+        "Es werden keine Cookies zu Analysezwecken gesetzt und keine Profile "
+        "gebildet.",
+        "Schriftarten und alle weiteren Gestaltungselemente sind lokal "
+        "eingebunden. Beim Aufruf der Seiten wird deshalb keine Verbindung zu "
+        "externen Anbietern hergestellt — mit Ausnahme der Karte auf der "
+        "Kontaktseite, die ausschliesslich nach Ihrer Zustimmung geladen wird.",
+    ]),
+    ("Speicherung Ihrer Entscheidung über externe Inhalte", [
+        "Ihre Entscheidung über externe Inhalte speichern wir im lokalen "
+        "Speicher Ihres Browsers unter der Bezeichnung „orca-cookie-consent“. "
+        "Vermerkt wird allein, ob Sie zugestimmt oder abgelehnt haben; "
+        "personenbezogene Daten werden dabei nicht übertragen.",
+        "Der Eintrag ist erforderlich, damit Ihre Auswahl beim nächsten Besuch "
+        "erhalten bleibt. Sie können ihn jederzeit über die Einstellungen "
+        "Ihres Browsers löschen; danach werden Sie erneut gefragt.",
+    ]),
+    ("Google Maps", [
+        "Auf der Kontaktseite binden wir eine Karte von Google Maps ein. Die "
+        "Karte wird erst geladen, nachdem Sie ausdrücklich zugestimmt haben. "
+        "Vorher wird keine Verbindung zu Google hergestellt.",
+        "Mit Ihrer Zustimmung werden Ihre IP-Adresse und weitere "
+        "Verbindungsdaten an Google übermittelt. Anbieter für Nutzer im "
+        "Europäischen Wirtschaftsraum ist die Google Ireland Limited, Dublin, "
+        "Irland; eine Übermittlung in die USA ist dabei möglich. "
+        "Rechtsgrundlage ist Ihre Einwilligung nach Art. 6 Abs. 1 lit. a "
+        "DSGVO. Sie können die Einwilligung jederzeit widerrufen, indem Sie "
+        "den gespeicherten Eintrag in Ihrem Browser löschen.",
+    ]),
+    ("Kontaktformular", [
+        "Wenn Sie das Kontaktformular nutzen, verarbeiten wir die von Ihnen "
+        "eingegebenen Angaben: Name, E-Mail-Adresse, Fahrzeug und Ihre "
+        "Nachricht. Diese Daten dienen ausschliesslich der Bearbeitung Ihrer "
+        "Anfrage. E-Mail-Adresse und Nachricht sind erforderlich, damit wir "
+        "antworten können; Name und Fahrzeug sind freiwillig.",
+        "Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO, soweit Ihre Anfrage "
+        "der Vorbereitung eines Vertrags dient, im Übrigen Art. 6 Abs. 1 "
+        "lit. f DSGVO.",
+        "Für die Übermittlung nutzen wir den Dienst FormSubmit "
+        "(formsubmit.co), einen Anbieter mit Sitz in den USA. Ihre Eingaben "
+        "werden dort verarbeitet und an unsere E-Mail-Adresse weitergeleitet; "
+        "damit ist eine Übermittlung in die USA verbunden. Wenn Sie das "
+        "vermeiden möchten, erreichen Sie uns jederzeit direkt per E-Mail an "
+        "info@orca.gmbh oder telefonisch.",
+        "Wir speichern Ihre Anfrage, bis sie abschliessend bearbeitet ist, und "
+        "löschen sie anschliessend, soweit keine gesetzlichen "
+        "Aufbewahrungsfristen entgegenstehen.",
+    ]),
+    ("Ihre Rechte", [
+        "Sie haben das Recht auf Auskunft über die zu Ihrer Person "
+        "gespeicherten Daten, auf Berichtigung unrichtiger Daten, auf Löschung "
+        "und auf Einschränkung der Verarbeitung. Ausserdem können Sie der "
+        "Verarbeitung widersprechen und die Übertragung Ihrer Daten in einem "
+        "gängigen Format verlangen. Eine erteilte Einwilligung können Sie "
+        "jederzeit widerrufen.",
+        "Wenden Sie sich dazu an die oben genannten Kontaktdaten. Unabhängig "
+        "davon steht Ihnen ein Beschwerderecht bei einer Aufsichtsbehörde zu. "
+        "Für uns zuständig ist der Landesbeauftragte für den Datenschutz und "
+        "die Informationsfreiheit Baden-Württemberg.",
+    ]),
+    ("Keine automatisierte Entscheidungsfindung", [
+        "Eine automatisierte Entscheidungsfindung einschliesslich Profiling "
+        "findet nicht statt.",
+    ]),
+]
+
+
+def datenschutz_markup() -> str:
+    """Erzeugt die Abschnitte im Escaping und Stil der gebauten Seite."""
+    h3 = ('<h3 style=\\"font-family:\'Cormorant Garamond\',serif; '
+          'font-weight:400; font-size:22px; margin:34px 0 12px;\\">')
+    p = ('<p style=\\"font-size:15px; line-height:1.8; color:{{ textMuted }}; '
+         'margin:0 0 16px;\\">')
+    teile = []
+    for titel, absaetze in DATENSCHUTZ:
+        teile.append(f'{h3}{titel}<\\u002Fh3>')
+        for a in absaetze:
+            teile.append(f'{p}{a}<\\u002Fp>')
+    return '\\n    ' + '\\n    '.join(teile)
+
+
 def url_for(lang: str, page: str) -> str:
     """Öffentliche Adresse einer Seite. Die Startseite läuft über den Ordner."""
     prefix = "" if lang == "de" else f"/{lang}"
@@ -275,6 +380,28 @@ def transform(src: str, lang: str, page: str) -> str:
                     'rgba(10,9,7,0.05) 32%, rgba(10,9,7,0.42) 60%, '
                     'rgba(10,9,7,0.82) 100%)')
         sub_once(old_grad, new_grad, "Hero-Verlauf")
+
+    # --- Datenschutzerklaerung ausbauen ------------------------------------
+    # Die bisherige Fassung nannte nur allgemeine Grundsaetze und ein
+    # Auskunftsrecht. Nicht erwaehnt waren Hosting, die Karte auf der
+    # Kontaktseite, die Speicherung der Zustimmung und das Kontaktformular —
+    # also gerade die Verarbeitungen, die tatsaechlich stattfinden. Der
+    # bisherige Abschnitt zu den Rechten geht im neuen Abschnitt "Ihre Rechte"
+    # auf und wird deshalb ersetzt.
+    if page == "Legal.html":
+        alt = ('<h3 style=\\"font-family:\'Cormorant Garamond\',serif; '
+               'font-weight:400; font-size:22px; margin:34px 0 12px;\\">'
+               'Recht auf Auskunft, Löschung, Sperrung<\\u002Fh3>\\n'
+               '    <p style=\\"font-size:15px; line-height:1.8; '
+               'color:{{ textMuted }}; margin:0 0 16px;\\">Sie haben jederzeit '
+               'das Recht auf unentgeltliche Auskunft über Ihre gespeicherten '
+               'personenbezogenen Daten, deren Herkunft und Empfänger und den '
+               'Zweck der Datenverarbeitung sowie ein Recht auf Berichtigung, '
+               'Sperrung oder Löschung dieser Daten. Hierzu sowie zu weiteren '
+               'Fragen zum Thema personenbezogene Daten können Sie sich '
+               'jederzeit unter der im Impressum angegebenen Adresse an uns '
+               'wenden.<\\u002Fp>')
+        sub_once(alt, datenschutz_markup().strip('\\n '), "Datenschutzerklärung")
 
     if page == "About.html":
         sub_once('<div style=\\"display:grid; '
