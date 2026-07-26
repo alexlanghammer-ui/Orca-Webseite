@@ -121,13 +121,14 @@ META = {
 
 INSTAGRAM_URL = "https://www.instagram.com/orca.restoration/"
 
-# Annahmestelle für das Kontaktformular. FormSubmit braucht keine Anmeldung:
-# Die erste Absendung löst eine Bestätigungsmail an die Adresse aus, erst nach
-# einem Klick darauf werden Nachrichten weitergeleitet. Nach der Freischaltung
-# lässt sich hier die dort angezeigte Kennung statt der Adresse eintragen, dann
-# steht die Mailadresse nicht mehr im Quelltext und wird nicht abgegriffen.
-# Ein Wechsel des Anbieters betrifft nur diese eine Zeile.
-FORM_ENDPOINT = "https://formsubmit.co/ajax/info@orca.gmbh"
+# Annahmestelle für das Kontaktformular: ein eigenes PHP-Skript auf dem
+# Strato-Webspace (kontakt.php, liegt unter tools/ als Vorlage). Es nimmt die
+# Eingaben an, schickt sie an info@orca.gmbh und bestätigt dem Absender den
+# Eingang. Damit ist kein Dritter mehr beteiligt — vorher lief die Übermittlung
+# über FormSubmit in den USA, ohne Auftragsverarbeitungsvertrag.
+# Die Website liegt auf GitHub Pages, das Skript auf einer eigenen Subdomain;
+# deshalb setzt es die nötigen CORS-Kopfzeilen.
+FORM_ENDPOINT = "https://formular.orca.gmbh/kontakt.php"
 
 # Instagram-Glyphe als eingebettetes SVG — kein externer Abruf, und die Farbe
 # erbt über currentColor die des umgebenden Links. Sämtliche Darstellung läuft
@@ -150,8 +151,9 @@ INSTA_ICON = (
 # ohne Zustimmung stellt keine der fünf Seiten eine Verbindung nach draussen her
 # (Schriften liegen eingebettet vor), die Karte lädt erst nach Zustimmung, und
 # die Entscheidung liegt im lokalen Speicher unter orca-cookie-consent.
-# Bewusst keine Angabe erfundener Firmendaten: Betreiber und Anschrift von
-# FormSubmit liessen sich nicht verifizieren, daher nur Dienst und Sitzland.
+# Das Kontaktformular lief zunaechst ueber FormSubmit in den USA; Betreiber und
+# Anschrift liessen sich nicht verifizieren und ein Auftragsverarbeitungsvertrag
+# war nicht zu bekommen. Es laeuft jetzt ueber kontakt.php auf eigenem Webspace.
 DATENSCHUTZ = [
     ("Verantwortlicher", [
         "Verantwortlich für die Datenverarbeitung auf dieser Website ist die "
@@ -208,12 +210,15 @@ DATENSCHUTZ = [
         "Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO, soweit Ihre Anfrage "
         "der Vorbereitung eines Vertrags dient, im Übrigen Art. 6 Abs. 1 "
         "lit. f DSGVO.",
-        "Für die Übermittlung nutzen wir den Dienst FormSubmit "
-        "(formsubmit.co), einen Anbieter mit Sitz in den USA. Ihre Eingaben "
-        "werden dort verarbeitet und an unsere E-Mail-Adresse weitergeleitet; "
-        "damit ist eine Übermittlung in die USA verbunden. Wenn Sie das "
-        "vermeiden möchten, erreichen Sie uns jederzeit direkt per E-Mail an "
-        "info@orca.gmbh oder telefonisch.",
+        "Die Übermittlung läuft über unseren eigenen Webspace bei der STRATO "
+        "AG, Otto-Ostrowski-Str. 7, 10249 Berlin, die uns als "
+        "Auftragsverarbeiterin Server in Deutschland bereitstellt. Ein "
+        "Dienstleister ausserhalb der Europäischen Union ist daran nicht "
+        "beteiligt. Beim Absenden werden neben Ihren Angaben Ihre IP-Adresse "
+        "und der Zeitpunkt kurzzeitig gespeichert, um Massenzusendungen zu "
+        "begrenzen; diese Angaben werden nach einer Stunde gelöscht.",
+        "An die von Ihnen angegebene Adresse senden wir eine automatische "
+        "Eingangsbestätigung mit einer Kopie Ihrer Nachricht.",
         "Wir speichern Ihre Anfrage, bis sie abschliessend bearbeitet ist, und "
         "löschen sie anschliessend, soweit keine gesetzlichen "
         "Aufbewahrungsfristen entgegenstehen.",
@@ -512,8 +517,10 @@ def transform(src: str, lang: str, page: str) -> str:
         'var f=document.querySelector(m?".orca-f-message":".orca-f-email");if(f)f.focus();return;}'
         'var hp=document.querySelector(".orca-f-hp");'
         'if(hp&&hp.value){return;}'
-        'var d={};d[t[0]]=n;d[t[1]]=m;d[t[2]]=v;d[t[3]]=x;'
-        'd._subject=t[8]+(v?" \\u2013 "+v:"");d._captcha="false";d._template="table";'
+        # Feldnamen fest und unabhaengig von der Sprache: kontakt.php erwartet
+        # genau diese. Die Sprache geht als eigenes Feld mit, damit die
+        # Eingangsbestaetigung in der Sprache der Website ankommt.
+        'var d={name:n,email:m,fahrzeug:v,nachricht:x,sprache:L,betreff:t[8]};'
         'b.disabled=true;sag(t[5],true);'
         f'fetch("{FORM_ENDPOINT}",{{method:"POST",'
         'headers:{"Content-Type":"application/json","Accept":"application/json"},'
