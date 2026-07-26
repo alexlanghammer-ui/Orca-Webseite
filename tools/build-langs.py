@@ -27,6 +27,9 @@ PAGES = ("index.html", "About.html", "Projects.html", "Contact.html", "Legal.htm
 
 OG_LOCALE = {"de": "de_DE", "en": "en_GB", "fr": "fr_FR"}
 
+# Beschriftung der Menue-Schaltflaeche fuer Screenreader.
+MENU_LABEL = {"de": "Menü", "en": "Menu", "fr": "Menu"}
+
 # Bild für JSON-LD und Vorschau. Das ursprüngliche hero.jpg existierte nicht.
 SCHEMA_IMAGE = f"{BASE}/images/porsche-917-15.jpg"
 
@@ -346,6 +349,57 @@ def transform(src: str, lang: str, page: str) -> str:
                f'<\\u002Fa>')
         s = re.sub(pattern, lambda _m, n=new: n, s, count=1)
 
+    # --- Handy: Menuepunkte in ein Burger-Menue --------------------------
+    # Vorher standen vier Menuepunkte und drei Sprachkuerzel gemeinsam in der
+    # Kopfzeile. Auf dem Handy brach das in zwei Reihen um und wirkte gedraengt;
+    # im Franzoesischen wurde daraus sogar eine zweite Spalte. Die Punkte
+    # wandern deshalb in ein aufklappbares Menue, die Sprachen bleiben sichtbar
+    # und werden groesser.
+    #
+    # Dazu bekommen die vier Punkte einen gemeinsamen Rahmen (aus dem auf dem
+    # Handy die Klappflaeche wird), der Sprachblock eine Klasse und die
+    # Navigation eine Schaltflaeche. Auf dem Desktop aendert sich nichts: Der
+    # Rahmen traegt dieselben Flex-Angaben wie die Navigation, die Schaltflaeche
+    # steht auf display:none.
+    nav_open = re.search(
+        r'<nav style=\\"display:flex; align-items:center; gap:24px;[^"]*\\">', s)
+    if nav_open is None:
+        raise SystemExit(f"{page} [{lang}]: Navigation nicht gefunden")
+    sub_once(nav_open.group(0),
+             nav_open.group(0) + '\\n      <div class=\\"orca-navlinks\\" '
+             'style=\\"display:flex; align-items:center; gap:24px;\\">',
+             "Rahmen um die Menuepunkte")
+
+    lang_box = re.search(
+        r'<div style=\\"display:flex; align-items:center; gap:8px; '
+        r'border-left:1px solid ([^;]+); padding-left:20px; '
+        r'flex-shrink:0;\\">', s)
+    if lang_box is None:
+        raise SystemExit(f"{page} [{lang}]: Sprachblock nicht gefunden")
+    sub_once(lang_box.group(0),
+             '<\\u002Fdiv>\\n      '
+             + lang_box.group(0).replace('<div style=',
+                                         '<div class=\\"orca-langs\\" style=', 1),
+             "Klasse am Sprachblock")
+
+    # Die Balken liegen als drei leere Elemente in der Schaltflaeche und erben
+    # ueber currentColor die Schriftfarbe der Kopfzeile — auf der Startseite
+    # hell ueber dem Video, auf den Unterseiten dunkel auf hellem Grund.
+    burger_colour = "#f8f5ef" if page == "index.html" else "{{ text }}"
+    bar = ('<span style=\\"display:block; width:22px; height:2px; '
+           'background:currentColor;\\"><\\u002Fspan>')
+    sub_once('<\\u002Fnav>',
+             '  <button type=\\"button\\" class=\\"orca-burger\\" '
+             f'aria-label=\\"{MENU_LABEL[lang]}\\" aria-expanded=\\"false\\" '
+             'style=\\"display:none; flex-direction:column; '
+             'justify-content:center; align-items:center; gap:5px; '
+             'width:40px; height:40px; padding:0; margin:0; border:0; '
+             f'background:none; color:{burger_colour}; cursor:pointer; '
+             'flex-shrink:0;\\">'
+             + bar * 3 +
+             '<\\u002Fbutton>\\n    <\\u002Fnav>',
+             "Menue-Schaltflaeche")
+
     # --- Hero: Standbild durch Video ersetzen ------------------------------
     # hero.mp4 ist die gedrehte Fassung des Hochformat-Clips (die Aufnahme lag
     # um 90 Grad gekippt in der Datei). Poster sorgt dafür, dass sofort ein
@@ -467,7 +521,30 @@ def transform(src: str, lang: str, page: str) -> str:
         # Faellt der Dienst aus, geht die Anfrage nicht verloren: Der Hinweis
         # nennt die Adresse, und der Knopf wird wieder bedienbar.
         'sag(t[7],false);b.disabled=false;});'
-        '},true);')
+        '},true);'
+        # Burger-Menue: Ein Klick auf die Schaltflaeche klappt die Menuepunkte
+        # auf, ein Klick daneben schliesst sie wieder. Der Listener haengt am
+        # Dokument, damit er unabhaengig vom Zeitpunkt des Renderns greift.
+        'document.addEventListener("click",function(ev){'
+        'var nv=document.querySelector("nav");if(!nv)return;'
+        'var t=ev.target;if(!t||!t.closest)return;'
+        'var b=t.closest(".orca-burger");'
+        'if(b){ev.preventDefault();'
+        'var o=nv.classList.toggle("orca-open");'
+        'b.setAttribute("aria-expanded",o?"true":"false");return;}'
+        'if(nv.classList.contains("orca-open")&&!t.closest("nav")){'
+        'nv.classList.remove("orca-open");'
+        'var s=nv.querySelector(".orca-burger");'
+        'if(s)s.setAttribute("aria-expanded","false");}'
+        '},true);'
+        'document.addEventListener("keydown",function(ev){'
+        'if(ev.key!=="Escape")return;'
+        'var nv=document.querySelector("nav");'
+        'if(!nv||!nv.classList.contains("orca-open"))return;'
+        'nv.classList.remove("orca-open");'
+        'var s=nv.querySelector(".orca-burger");'
+        'if(s){s.setAttribute("aria-expanded","false");s.focus();}'
+        '});')
     sub_once(old_boot, new_boot, "Kontaktformular verdrahten")
 
     if page == "Contact.html":
@@ -539,15 +616,75 @@ def transform(src: str, lang: str, page: str) -> str:
         '    h1 { white-space: normal !important; }\\n'
         '    #orca-cookie-banner { padding: 16px 18px !important; }\\n'
         '  }')
+    # Klappflaeche und Trennlinien richten sich nach der Kopfzeile: Auf der
+    # Startseite liegt sie ueber dem Video und ist dunkel, auf den Unterseiten
+    # hell wie der Seitenhintergrund.
+    # Bewusst als Zahlenwert und nicht als {{ bg }}/{{ line }}: Im Stylesheet
+    # werden diese Platzhalter nicht ersetzt. Auf Legal.html bleiben sie sogar
+    # unveraendert stehen, auf den uebrigen Seiten wird der Text erst nach dem
+    # Auswerten der Regeln getauscht — die Angabe faellt in beiden Faellen
+    # ersatzlos weg (dieselbe Ursache liegt hinter dem toten
+    # "body { background: {{ bg }} }" im Export). In Attributen greift die
+    # Ersetzung dagegen, deshalb steht {{ text }} unten am Balken. Die Werte
+    # entsprechen dem Farbschema des Entwurfs; sie muessen nachgezogen werden,
+    # falls sich dieses aendert.
+    panel_bg = "rgba(10,9,7,0.96)" if page == "index.html" else "#f6f3ee"
+    panel_line = ("rgba(248,245,239,0.18)" if page == "index.html"
+                  else "#ddd7cc")
     new_media = (
         '@media (max-width: 820px) {\\n'
-        '    header { padding: 16px 22px !important; flex-wrap: wrap !important; gap: 10px 18px !important; }\\n'
-        '    /* flex-shrink muss mit aufgehoben werden: Die Navigation traegt\\n'
-        '       inline flex-shrink:0 und behielt dadurch ihre volle Breite,\\n'
-        '       obwohl Umbruch erlaubt war — auf 360px lief sie 27px hinaus. */\\n'
-        '    nav { gap: 12px 14px !important; font-size: 10px !important;\\n'
-        '          flex-wrap: wrap !important; white-space: normal !important;\\n'
-        '          flex-shrink: 1 !important; min-width: 0 !important; }\\n'
+        '    /* Kopfzeile bleibt einzeilig: Logo links, Sprachen und\\n'
+        '       Menue-Schaltflaeche rechts. Der Umbruch von vorher entfaellt,\\n'
+        '       weil die Menuepunkte in die Klappflaeche gewandert sind. */\\n'
+        '    header { padding: 14px 22px !important; flex-wrap: nowrap !important;\\n'
+        '             gap: 14px !important; }\\n'
+        '    /* Bezugspunkt fuer die Klappflaeche. Bewusst ohne !important: Die\\n'
+        '       Kopfzeile der Startseite traegt inline position:absolute und\\n'
+        '       liegt dadurch weiter ueber dem Video — mit !important wuerde\\n'
+        '       sie in den Textfluss zurueckfallen und den Hero nach unten\\n'
+        '       schieben. Ein Bezugspunkt ist sie als absolute ohnehin. */\\n'
+        '    header { position: relative; }\\n'
+        '    /* Der Firmenname darf schrumpfen und umbrechen, damit rechts\\n'
+        '       genug Platz bleibt; inline stand dort nowrap und\\n'
+        '       flex-shrink:0. */\\n'
+        '    header > a.logo-link { font-size: 14px !important;\\n'
+        '                          white-space: normal !important;\\n'
+        '                          line-height: 1.25 !important;\\n'
+        '                          flex-shrink: 1 !important;\\n'
+        '                          min-width: 0 !important; }\\n'
+        '    nav { gap: 8px !important; flex-wrap: nowrap !important;\\n'
+        '          flex-shrink: 0 !important; }\\n'
+        '    .orca-navlinks { display: none !important; }\\n'
+        '    .orca-burger { display: flex !important; }\\n'
+        '    /* Ohne die Menuepunkte daneben trennt der Strich nichts mehr. */\\n'
+        '    .orca-langs { gap: 2px !important; border-left: 0 !important;\\n'
+        '                  padding-left: 0 !important; }\\n'
+        '    /* Aufgeklappt: volle Breite unter der Kopfzeile. */\\n'
+        f'    nav.orca-open .orca-navlinks {{ display: flex !important;\\n'
+        '                                   flex-direction: column !important;\\n'
+        '                                   align-items: stretch !important;\\n'
+        '                                   gap: 0 !important;\\n'
+        '                                   position: absolute;\\n'
+        '                                   top: 100%; left: 0; right: 0;\\n'
+        '                                   z-index: 30;\\n'
+        f'                                   background: {panel_bg};\\n'
+        f'                                   border-top: 1px solid {panel_line};\\n'
+        f'                                   border-bottom: 1px solid {panel_line};\\n'
+        '                                   padding: 6px 22px 12px;\\n'
+        '                                   box-sizing: border-box; }\\n'
+        '    nav.orca-open .orca-navlinks a.nav-link {\\n'
+        '        min-height: 50px !important; font-size: 12px !important;\\n'
+        '        border-bottom: 0 !important; padding: 0 0 0 14px !important; }\\n'
+        '    /* Die aktuelle Seite ist im Export durch border-bottom im\\n'
+        '       style-Attribut markiert. Untereinander wirkt eine Unterkante\\n'
+        '       wie eine Trennlinie, deshalb wandert die Markierung an die\\n'
+        '       linke Seite. Der Selektor greift auf den Namen der\\n'
+        '       Eigenschaft zu, den die rendernde Schicht unveraendert\\n'
+        '       uebernimmt — anders als den Wert, in den sie Leerzeichen\\n'
+        '       einfuegt. */\\n'
+        '    nav.orca-open .orca-navlinks a.nav-link[style*=\\"border-bottom\\"] {\\n'
+        '        border-left: 2px solid currentColor !important;\\n'
+        '        padding-left: 12px !important; }\\n'
         '    section { padding-left: 22px !important; padding-right: 22px !important; }\\n'
         '    footer { padding-left: 22px !important; padding-right: 22px !important; gap: 14px 26px !important; }\\n'
         '    /* Alle mehrspaltigen Raster untereinander. Bewusst als Flex-Spalte\\n'
@@ -601,23 +738,28 @@ def transform(src: str, lang: str, page: str) -> str:
         '    .orca-modal-close { position: fixed !important; top: 22px !important;\\n'
         '                        right: 22px !important; z-index: 2 !important; }\\n'
         '    /* Antippflaechen. Die Sprachumschalter waren 15x14 Pixel gross —\\n'
-        '       empfohlen sind mindestens 44x44, darunter trifft man sie mit dem\\n'
-        '       Finger nicht verlaesslich. Gleiches gilt fuer die Menuepunkte. */\\n'
-        '    nav a.lang-switch { min-width: 44px !important; min-height: 44px !important;\\n'
+        '       empfohlen sind mindestens 44x44 Punkte, darunter trifft man sie\\n'
+        '       mit dem Finger nicht verlaesslich. 40x40 plus Abstand kommt dem\\n'
+        '       nahe und laesst neben dem Firmennamen noch Platz; die Schrift\\n'
+        '       waechst von 10 auf 14 Pixel. */\\n'
+        '    nav a.lang-switch { min-width: 40px !important; min-height: 40px !important;\\n'
         '                        display: inline-flex !important;\\n'
         '                        align-items: center !important;\\n'
         '                        justify-content: center !important;\\n'
-        '                        font-size: 13px !important; }\\n'
-        '    /* Die Menuepunkte sind breit und daher leichter zu treffen; 38px\\n'
-        '       genuegen und halten die Kopfzeile flacher. */\\n'
-        '    nav a.nav-link { min-height: 38px !important; display: inline-flex !important;\\n'
+        '                        font-size: 14px !important; }\\n'
+        '    nav a.nav-link { display: inline-flex !important;\\n'
         '                     align-items: center !important; }\\n'
-        '    /* Die Schraegstriche zwischen den Sprachen entfallen: Mit 44px\\n'
+        '    /* Die Schraegstriche zwischen den Sprachen entfallen: Mit 40px\\n'
         '       breiten Feldern sind die Kuerzel ohnehin klar getrennt, und die\\n'
         '       Striche wirkten zwischen den groesseren Flaechen verloren. */\\n'
         '    nav a.lang-switch + span { display: none !important; }\\n'
-        '    header { padding-top: 12px !important; padding-bottom: 12px !important; }\\n'
-        '    nav { row-gap: 2px !important; }\\n'
+        '    /* Die Markierung der aktuellen Sprache sitzt am Text und nicht am\\n'
+        '       unteren Rand der 40 Pixel hohen Antippflaeche — dort stand sie\\n'
+        '       13 Pixel unter der Schrift und wirkte losgeloest. */\\n'
+        '    a.lang-switch.is-active { border-bottom: 0 !important;\\n'
+        '                              padding-bottom: 0 !important;\\n'
+        '                              text-decoration: underline !important;\\n'
+        '                              text-underline-offset: 5px !important; }\\n'
         '    h1 { white-space: normal !important; }\\n'
         '    #orca-cookie-banner { padding: 16px 18px !important; }\\n'
         '  }\\n'
