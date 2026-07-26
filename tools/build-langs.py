@@ -290,6 +290,84 @@ def transform(src: str, lang: str, page: str) -> str:
                    'loop=\\"true\\" playsinline=\\"true\\" preload=\\"auto\\"')
         sub_once(old_vid, new_vid, "video-Tag")
 
+    # --- Handy: Responsive-Regeln ersetzen --------------------------------
+    old_media = (
+        '@media (max-width: 820px) {\\n'
+        '    header { padding: 16px 22px !important; flex-wrap: wrap !important; gap: 10px 18px !important; }\\n'
+        '    nav { gap: 14px !important; font-size: 10px !important; }\\n'
+        '    section { padding-left: 22px !important; padding-right: 22px !important; }\\n'
+        '    footer { padding-left: 22px !important; padding-right: 22px !important; gap: 14px 26px !important; }\\n'
+        '    [style*=\\"grid-template-columns\\"] { grid-template-columns: 1fr !important; }\\n'
+        '    [style*=\\"repeat(4\\"] { grid-template-columns: 1fr 1fr !important; }\\n'
+        '    [style*=\\"repeat(5\\"] { grid-template-columns: 1fr 1fr !important; }\\n'
+        '    [style*=\\"left:56px\\"] { left: 22px !important; right: 22px !important; }\\n'
+        '    h1 { white-space: normal !important; }\\n'
+        '    #orca-cookie-banner { padding: 16px 18px !important; }\\n'
+        '  }')
+    new_media = (
+        '@media (max-width: 820px) {\\n'
+        '    header { padding: 16px 22px !important; flex-wrap: wrap !important; gap: 10px 18px !important; }\\n'
+        '    /* flex-shrink muss mit aufgehoben werden: Die Navigation traegt\\n'
+        '       inline flex-shrink:0 und behielt dadurch ihre volle Breite,\\n'
+        '       obwohl Umbruch erlaubt war — auf 360px lief sie 27px hinaus. */\\n'
+        '    nav { gap: 12px 14px !important; font-size: 10px !important;\\n'
+        '          flex-wrap: wrap !important; white-space: normal !important;\\n'
+        '          flex-shrink: 1 !important; min-width: 0 !important; }\\n'
+        '    section { padding-left: 22px !important; padding-right: 22px !important; }\\n'
+        '    footer { padding-left: 22px !important; padding-right: 22px !important; gap: 14px 26px !important; }\\n'
+        '    /* Alle Raster einspaltig. minmax(0,1fr) statt 1fr, weil 1fr fuer\\n'
+        '       minmax(auto,1fr) steht und die Spalte damit nicht unter die\\n'
+        '       Mindestbreite ihres Inhalts schrumpfen kann. Genau daran liefen\\n'
+        '       die Portraits der Fuehrungskraefte 470px breit in ein 346px\\n'
+        '       schmales Raster, und die Kennzahlen landeten in zwei ungleichen\\n'
+        '       Spalten statt mittig. */\\n'
+        '    [style*=\\"grid-template-columns\\"] { grid-template-columns: minmax(0, 1fr) !important; }\\n'
+        '    /* Inhalte in einspaltigen Rastern mittig und nie breiter als die Zelle. */\\n'
+        '    image-slot, video, img { max-width: 100% !important; }\\n'
+        '    /* Hero: Text und Schaltflaeche an den Seitenrand. */\\n'
+        '    .orca-hero-text { left: 22px !important; right: 22px !important; }\\n'
+        '    /* Hero flacher. Ein 16:9-Video wird in einem hochformatigen Fenster\\n'
+        '       bei object-fit:cover stark seitlich beschnitten — bei 100vh gehen\\n'
+        '       rund drei Viertel der Bildbreite verloren. Flacher heisst mehr\\n'
+        '       sichtbare Breite und weniger Videowand. */\\n'
+        '    /* Kein Seitenabstand am Hero: Er ist randlos, und weil er\\n'
+        '       width:100% ohne border-box traegt, kaemen die 22px oben drauf —\\n'
+        '       die Seite liess sich dadurch 44px seitlich verschieben. */\\n'
+        '    .orca-hero { height: 74vh !important; min-height: 500px !important;\\n'
+        '                 padding-left: 0 !important; padding-right: 0 !important; }\\n'
+        '    /* Innenabstand des Kennzahlen-Rasters zuruecknehmen, sonst bleiben\\n'
+        '       von 346px nur 234px fuer den Inhalt. */\\n'
+        '    .orca-stats { padding-left: 0 !important; padding-right: 0 !important; }\\n'
+        '    h1 { white-space: normal !important; }\\n'
+        '    #orca-cookie-banner { padding: 16px 18px !important; }\\n'
+        '  }')
+    sub_once(old_media, new_media, "Responsive-Regeln")
+
+    # Klassen fuer die beiden Hero-Elemente, damit die Regeln oben nicht auf
+    # Zeichenketten im style-Attribut angewiesen sind: Die rendernde Schicht
+    # schreibt diese um ("left: 56px" mit Leerzeichen), wodurch der bisherige
+    # Selektor [style*="left:56px"] nie gegriffen hat.
+    if page == "index.html":
+        sub_once('<section style=\\"position:relative; width:100%; height:100vh; '
+                 'min-height:600px; overflow:hidden; background:#14130f;\\">',
+                 '<section class=\\"orca-hero\\" style=\\"position:relative; '
+                 'width:100%; height:100vh; min-height:600px; overflow:hidden; '
+                 'background:#14130f;\\">',
+                 "Klasse am Hero-Abschnitt")
+        sub_once('<div style=\\"position:absolute; left:56px; right:56px; '
+                 'bottom:158px; max-width:720px;\\">',
+                 '<div class=\\"orca-hero-text\\" style=\\"position:absolute; '
+                 'left:56px; right:56px; bottom:158px; max-width:720px;\\">',
+                 "Klasse am Hero-Text")
+        sub_once('<div style=\\"max-width:1200px; margin:0 auto; '
+                 'padding:70px 56px; box-sizing:border-box; display:grid; '
+                 'grid-template-columns:repeat(4,minmax(0,1fr)); gap:32px;\\">',
+                 '<div class=\\"orca-stats\\" style=\\"max-width:1200px; '
+                 'margin:0 auto; padding:70px 56px; box-sizing:border-box; '
+                 'display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); '
+                 'gap:32px;\\">',
+                 "Klasse am Kennzahlen-Raster")
+
     # --- Instagram im Footer jeder Seite ----------------------------------
     old_foot = ('<a href=\\"mailto:info@orca.gmbh\\" class=\\"link-fade\\" '
                 'style=\\"color:{{ accent }};\\" style-hover=\\"color:{{ text }}\\">'
