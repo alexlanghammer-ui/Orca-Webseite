@@ -338,10 +338,53 @@ def transform(src: str, lang: str, page: str) -> str:
         '    /* Innenabstand des Kennzahlen-Rasters zuruecknehmen, sonst bleiben\\n'
         '       von 346px nur 234px fuer den Inhalt. */\\n'
         '    .orca-stats { padding-left: 0 !important; padding-right: 0 !important; }\\n'
+        '    /* Detailansicht der Projekte. Einspaltig stehen Bild und Text\\n'
+        '       untereinander und werden zusammen hoeher als der Dialog. Der\\n'
+        '       hatte overflow:hidden, die Textspalte zugleich eine eigene\\n'
+        '       Scrollflaeche mit max-height:86vh — der Text war dadurch\\n'
+        '       abgeschnitten und nicht erreichbar. Jetzt scrollt der Dialog\\n'
+        '       als Ganzes, und die Textspalte gibt ihre Scrollflaeche ab. */\\n'
+        '    .orca-modal-overlay { padding: 14px !important; align-items: flex-start !important; }\\n'
+        '    .orca-modal { max-height: calc(100vh - 28px) !important;\\n'
+        '                  overflow-y: auto !important;\\n'
+        '                  -webkit-overflow-scrolling: touch !important; }\\n'
+        '    .orca-modal-media { min-height: 210px !important; }\\n'
+        '    .orca-modal-text { padding: 26px 22px 34px !important;\\n'
+        '                       overflow-y: visible !important; max-height: none !important; }\\n'
+        '    /* Schliessen bleibt sichtbar, statt beim Scrollen wegzuwandern. */\\n'
+        '    .orca-modal-close { position: fixed !important; top: 22px !important;\\n'
+        '                        right: 22px !important; z-index: 2 !important; }\\n'
         '    h1 { white-space: normal !important; }\\n'
         '    #orca-cookie-banner { padding: 16px 18px !important; }\\n'
         '  }')
     sub_once(old_media, new_media, "Responsive-Regeln")
+
+    # Klassen an die vier Bausteine der Projekt-Detailansicht.
+    if page == "Projects.html":
+        sub_once('<div sc-camel-on-click=\\"{{ closeProject }}\\" '
+                 'style=\\"position:fixed; inset:0; z-index:60;',
+                 '<div sc-camel-on-click=\\"{{ closeProject }}\\" '
+                 'class=\\"orca-modal-overlay\\" '
+                 'style=\\"position:fixed; inset:0; z-index:60;',
+                 "Klasse am Dialog-Hintergrund")
+        sub_once('<div sc-camel-on-click=\\"{{ stop }}\\" '
+                 'style=\\"position:relative; width:100%; max-width:1080px;',
+                 '<div sc-camel-on-click=\\"{{ stop }}\\" class=\\"orca-modal\\" '
+                 'style=\\"position:relative; width:100%; max-width:1080px;',
+                 "Klasse am Dialog")
+        sub_once('<div style=\\"position:relative; min-height:340px; '
+                 'background:{{ line }};\\">',
+                 '<div class=\\"orca-modal-media\\" style=\\"position:relative; '
+                 'min-height:340px; background:{{ line }};\\">',
+                 "Klasse am Medienblock")
+        sub_once('<div style=\\"padding:48px 44px; overflow-y:auto; '
+                 'max-height:86vh;\\">',
+                 '<div class=\\"orca-modal-text\\" style=\\"padding:48px 44px; '
+                 'overflow-y:auto; max-height:86vh;\\">',
+                 "Klasse am Textblock")
+        sub_once('border-radius:50%;\\" class=\\"link-fade\\"',
+                 'border-radius:50%;\\" class=\\"link-fade orca-modal-close\\"',
+                 "Klasse an der Schliess-Schaltflaeche")
 
     # Klassen fuer die beiden Hero-Elemente, damit die Regeln oben nicht auf
     # Zeichenketten im style-Attribut angewiesen sind: Die rendernde Schicht
