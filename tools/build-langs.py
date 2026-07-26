@@ -111,6 +111,25 @@ META = {
 }
 
 
+INSTAGRAM_URL = "https://www.instagram.com/orca.restoration/"
+
+# Instagram-Glyphe als eingebettetes SVG — kein externer Abruf, und die Farbe
+# erbt über currentColor die des umgebenden Links. Sämtliche Darstellung läuft
+# über style statt über Attribute wie stroke-width: Attribute mit Bindestrich
+# verwirft die rendernde Schicht der Seite teilweise (dasselbe Verhalten wie
+# beim muted-Attribut der Videos).
+INSTA_ICON = (
+    '<svg viewBox=\\"0 0 24 24\\" width=\\"14\\" height=\\"14\\" '
+    'style=\\"vertical-align:-2px; margin-right:6px; fill:none; '
+    'stroke:currentColor; stroke-width:1.9\\">'
+    '<rect x=\\"3\\" y=\\"3\\" width=\\"18\\" height=\\"18\\" rx=\\"5\\"><\\u002Frect>'
+    '<circle cx=\\"12\\" cy=\\"12\\" r=\\"4\\"><\\u002Fcircle>'
+    '<circle cx=\\"17.2\\" cy=\\"6.8\\" r=\\"1.15\\" '
+    'style=\\"fill:currentColor; stroke:none\\"><\\u002Fcircle>'
+    '<\\u002Fsvg>'
+)
+
+
 def url_for(lang: str, page: str) -> str:
     """Öffentliche Adresse einer Seite. Die Startseite läuft über den Ordner."""
     prefix = "" if lang == "de" else f"/{lang}"
@@ -270,6 +289,39 @@ def transform(src: str, lang: str, page: str) -> str:
         new_vid = ('<video controls=\\"true\\" autoplay=\\"true\\" muted=\\"true\\" '
                    'loop=\\"true\\" playsinline=\\"true\\" preload=\\"auto\\"')
         sub_once(old_vid, new_vid, "video-Tag")
+
+    # --- Instagram im Footer jeder Seite ----------------------------------
+    old_foot = ('<a href=\\"mailto:info@orca.gmbh\\" class=\\"link-fade\\" '
+                'style=\\"color:{{ accent }};\\" style-hover=\\"color:{{ text }}\\">'
+                'info@orca.gmbh<\\u002Fa><\\u002Fdiv>')
+    new_foot = ('<a href=\\"mailto:info@orca.gmbh\\" class=\\"link-fade\\" '
+                'style=\\"color:{{ accent }};\\" style-hover=\\"color:{{ text }}\\">'
+                'info@orca.gmbh<\\u002Fa> · '
+                f'<a href=\\"{INSTAGRAM_URL}\\" target=\\"_blank\\" '
+                'rel=\\"noopener noreferrer\\" class=\\"link-fade\\" '
+                'style=\\"color:{{ accent }};\\" style-hover=\\"color:{{ text }}\\">'
+                f'{INSTA_ICON}Instagram<\\u002Fa><\\u002Fdiv>')
+    sub_once(old_foot, new_foot, "Instagram im Footer")
+
+    # --- Instagram zusätzlich in den Kontaktblock --------------------------
+    # Dort sucht man Kontaktwege, also gehört das Profil dorthin. Angehängt
+    # nach den Öffnungszeiten, im gleichen Aufbau wie die übrigen Einträge.
+    # "Instagram" braucht keine Übersetzung.
+    if page == "Contact.html":
+        old_hours = ('<div style=\\"font-size:15px; line-height:1.7; '
+                     'color:{{ textMuted }};\\">{{ t.hoursValue }}<\\u002Fdiv>\\n'
+                     '      <\\u002Fdiv>')
+        new_hours = (old_hours +
+                     '\\n      <div>\\n'
+                     '        <div style=\\"font-size:11px; letter-spacing:0.14em; '
+                     'text-transform:uppercase; color:{{ accent }}; '
+                     'margin-bottom:8px;\\">Instagram<\\u002Fdiv>\\n'
+                     f'        <a href=\\"{INSTAGRAM_URL}\\" target=\\"_blank\\" '
+                     'rel=\\"noopener noreferrer\\" style=\\"font-size:15px; '
+                     'color:{{ text }};\\" style-hover=\\"color:{{ accent }}\\">'
+                     f'{INSTA_ICON}@orca.restoration<\\u002Fa>\\n'
+                     '      <\\u002Fdiv>')
+        sub_once(old_hours, new_hours, "Instagram im Kontaktblock")
 
     # --- Startseiten-Links auf die Ordnerform bringen ---------------------
     # Logo, "Start" in der Navigation und der Sprachumschalter zeigten auf
