@@ -21,7 +21,12 @@ import shutil
 import sys
 from pathlib import Path
 
-BASE = "https://orca-restoration.com"
+BASE = "https://orca.gmbh"
+
+# Die Adresse, die im Export selbst steht. Sie dient nur als Suchmuster und
+# darf nicht mitgeaendert werden, wenn BASE auf eine neue Domain zeigt —
+# sonst findet das Skript die Stellen im Export nicht mehr.
+EXPORT_BASE = "https://orca-restoration.com"
 LANGS = ("de", "en", "fr")
 PAGES = ("index.html", "About.html", "Projects.html", "Contact.html", "Legal.html")
 
@@ -907,10 +912,10 @@ def transform(src: str, lang: str, page: str) -> str:
     sub_once(f'\\"description\\":\\"{SCHEMA_DESC["de"]}\\"',
              f'\\"description\\":\\"{SCHEMA_DESC[lang]}\\"',
              "JSON-LD description")
-    sub_once(f'\\"image\\":\\"{BASE}/hero.jpg\\"',
+    sub_once(f'\\"image\\":\\"{EXPORT_BASE}/hero.jpg\\"',
              f'\\"image\\":\\"{SCHEMA_IMAGE}\\"',
              "JSON-LD image")
-    sub_once(f'\\"url\\":\\"{BASE}/\\"',
+    sub_once(f'\\"url\\":\\"{EXPORT_BASE}/\\"',
              f'\\"url\\":\\"{url_for(lang, page)}\\"',
              "JSON-LD url")
 

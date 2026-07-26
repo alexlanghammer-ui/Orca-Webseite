@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://orca-restoration.com/sitemap.xml
+Sitemap: https://orca.gmbh/sitemap.xml
