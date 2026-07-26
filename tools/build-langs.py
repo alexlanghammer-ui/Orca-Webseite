@@ -522,17 +522,29 @@ def transform(src: str, lang: str, page: str) -> str:
         # Eingangsbestaetigung in der Sprache der Website ankommt.
         'var d={name:n,email:m,fahrzeug:v,nachricht:x,sprache:L,betreff:t[8]};'
         'b.disabled=true;sag(t[5],true);'
+        # Bewusst text/plain statt application/json: Ein JSON-Kopf macht die
+        # Anfrage zu einer "nicht einfachen" und der Browser schickt vorher eine
+        # OPTIONS-Vorabfrage. Die ist eine zusaetzliche Fehlerquelle — sperrt
+        # der Server sie, kommt die eigentliche Anfrage nie an. Der Inhalt
+        # bleibt JSON, kontakt.php liest den Rumpf und nicht den Kopf.
         f'fetch("{FORM_ENDPOINT}",{{method:"POST",'
-        'headers:{"Content-Type":"application/json","Accept":"application/json"},'
+        'headers:{"Content-Type":"text/plain;charset=UTF-8"},'
         'body:JSON.stringify(d)}).then(function(r){'
-        'if(!r.ok)throw new Error("HTTP "+r.status);return r.json();}).then(function(){'
+        'return r.text().then(function(tx){return {ok:r.ok,st:r.status,tx:tx};});'
+        '}).then(function(a){'
+        'var j=null;try{j=JSON.parse(a.tx);}catch(e){}'
+        'if(!a.ok||!j||!j.ok)throw new Error(j&&j.fehler?j.fehler:"HTTP "+a.st);'
         'sag(t[6],true);'
         '["orca-f-name","orca-f-email","orca-f-vehicle","orca-f-message"].forEach(function(c){'
         'var el=document.querySelector("."+c);if(el)el.value="";});'
-        'b.disabled=false;}).catch(function(){'
+        'b.disabled=false;}).catch(function(e){'
         # Faellt der Dienst aus, geht die Anfrage nicht verloren: Der Hinweis
-        # nennt die Adresse, und der Knopf wird wieder bedienbar.
-        'sag(t[7],false);b.disabled=false;});'
+        # nennt die Adresse, und der Knopf wird wieder bedienbar. Der Grund
+        # steht in Klammern dahinter — ohne ihn ist von aussen nicht zu
+        # unterscheiden, ob der Server ablehnt, die Mail scheitert oder die
+        # Verbindung gar nicht zustande kommt.
+        'sag(t[7]+" ("+((e&&e.message)||"Verbindung")+")",false);'
+        'b.disabled=false;});'
         '},true);'
         # Burger-Menue: Ein Klick auf die Schaltflaeche klappt die Menuepunkte
         # auf, ein Klick daneben schliesst sie wieder. Der Listener haengt am
