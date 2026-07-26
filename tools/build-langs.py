@@ -211,6 +211,59 @@ def transform(src: str, lang: str, page: str) -> str:
                f'<\\u002Fa>')
         s = re.sub(pattern, lambda _m, n=new: n, s, count=1)
 
+    # --- Hero: Standbild durch Video ersetzen ------------------------------
+    # hero.mp4 ist die gedrehte Fassung des Hochformat-Clips (die Aufnahme lag
+    # um 90 Grad gekippt in der Datei). Poster sorgt dafür, dass sofort ein
+    # Bild steht, während die 5 MB laden.
+    if page == "index.html":
+        old_slot = ('<image-slot id=\\"hero-main\\" shape=\\"rect\\" '
+                    'placeholder=\\"Porsche Rennwagen – Titelbild (später Video)\\" '
+                    'style=\\"position:absolute; inset:0; width:100%; height:100%;\\" '
+                    'src=\\"e264a4e1-5ee2-422f-9bcf-5a715b5d17b3\\"><\\u002Fimage-slot>')
+        pre = "../" if lang != "de" else "./"
+        new_video = (
+            f'<video autoplay=\\"true\\" muted=\\"true\\" loop=\\"true\\" '
+            f'playsinline=\\"true\\" preload=\\"auto\\" '
+            f'poster=\\"{pre}hero-poster.jpg\\" '
+            f'style=\\"position:absolute; inset:0; width:100%; height:100%; '
+            f'object-fit:cover; display:block;\\">'
+            f'<source src=\\"{pre}hero.mp4\\" type=\\"video/mp4\\">'
+            f'<\\u002Fvideo>')
+        sub_once(old_slot, new_video, "Hero-Bildplatz")
+
+        # Der Verlauf über dem Hero war für ein ruhiges Standbild ausgelegt.
+        # Über dem Video fiel die Überschrift bei hellem Himmel und heller
+        # Strasse teils unter den WCAG-Mindestkontrast von 3:1 (9,1 % der
+        # Pixel). Mit 0.32 an der 60-Prozent-Marke bleibt kein Pixel darunter,
+        # das Bild wird dabei nur rund 5 Prozentpunkte stärker abgedunkelt.
+        old_grad = ('background:linear-gradient(180deg, rgba(10,9,7,0.45) 0%, '
+                    'rgba(10,9,7,0.05) 32%, rgba(10,9,7,0.15) 60%, '
+                    'rgba(10,9,7,0.78) 100%)')
+        new_grad = ('background:linear-gradient(180deg, rgba(10,9,7,0.45) 0%, '
+                    'rgba(10,9,7,0.05) 32%, rgba(10,9,7,0.32) 60%, '
+                    'rgba(10,9,7,0.82) 100%)')
+        sub_once(old_grad, new_grad, "Hero-Verlauf")
+
+    # --- Systemeinstellung "Bewegung reduzieren" beachten ------------------
+    # Die Startseite spielt zwei Videos automatisch. Wer im Betriebssystem
+    # reduzierte Bewegung eingestellt hat, bekommt stattdessen das Standbild:
+    # automatisch bewegte Flächen sind für bewegungsempfindliche Menschen
+    # belastend. Angehängt an reveal(), weil die Videos erst existieren,
+    # sobald die Seite gerendert ist.
+    # Bewusst ereignisbasiert und nicht in reveal(): Ein einmaliger Aufruf
+    # trifft die Videos nicht zuverlässig, weil sie zu diesem Zeitpunkt noch
+    # nicht im Dokument stehen. Der Listener am Dokument greift unabhängig
+    # davon, wann ein Video auftaucht, und auch bei jedem Schleifenneustart.
+    old_boot = 'h.classList.add("__orca-boot");'
+    new_boot = (
+        'h.classList.add("__orca-boot");'
+        'document.addEventListener("play",function(e){try{'
+        'if(e.target&&e.target.tagName==="VIDEO"&&'
+        'matchMedia("(prefers-reduced-motion: reduce)").matches){'
+        'e.target.autoplay=false;e.target.loop=false;e.target.pause();}'
+        '}catch(err){}},true);')
+    sub_once(old_boot, new_boot, "Bewegungseinstellung beachten")
+
     # --- Video im Abschnitt "Restauration in Bewegung" --------------------
     # Der 16:9-Rahmen des Entwurfs bleibt unverändert: restauration.mp4 wurde
     # auf 720x404 zugeschnitten (die Instagram-Fassung hatte oben und unten je
