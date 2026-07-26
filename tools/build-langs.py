@@ -113,6 +113,14 @@ META = {
 
 INSTAGRAM_URL = "https://www.instagram.com/orca.restoration/"
 
+# Annahmestelle für das Kontaktformular. FormSubmit braucht keine Anmeldung:
+# Die erste Absendung löst eine Bestätigungsmail an die Adresse aus, erst nach
+# einem Klick darauf werden Nachrichten weitergeleitet. Nach der Freischaltung
+# lässt sich hier die dort angezeigte Kennung statt der Adresse eintragen, dann
+# steht die Mailadresse nicht mehr im Quelltext und wird nicht abgegriffen.
+# Ein Wechsel des Anbieters betrifft nur diese eine Zeile.
+FORM_ENDPOINT = "https://formsubmit.co/ajax/info@orca.gmbh"
+
 # Instagram-Glyphe als eingebettetes SVG — kein externer Abruf, und die Farbe
 # erbt über currentColor die des umgebenden Links. Sämtliche Darstellung läuft
 # über style statt über Attribute wie stroke-width: Attribute mit Bindestrich
@@ -224,8 +232,11 @@ def transform(src: str, lang: str, page: str) -> str:
                 f"{len(found)} Treffer erwartet 1."
             )
         colour_var = found[0]
+        # Die aktuelle Sprache wird markiert, damit sie sich nicht nur durch
+        # Transparenz von den anderen abhebt — bei 10px Schrift kaum zu sehen.
+        klasse = "lang-switch is-active" if target == lang else "lang-switch"
         new = (f'<a href=\\"{switch_href(lang, target, page)}\\" '
-               f'class=\\"lang-switch\\" style=\\"'
+               f'class=\\"{klasse}\\" style=\\"'
                f'color:{{{{ {colour_var} }}}};\\">{target.upper()}'
                f'<\\u002Fa>')
         s = re.sub(pattern, lambda _m, n=new: n, s, count=1)
@@ -286,24 +297,50 @@ def transform(src: str, lang: str, page: str) -> str:
     old_boot = 'h.classList.add("__orca-boot");'
     new_boot = (
         'h.classList.add("__orca-boot");'
-        'document.addEventListener("click",function(ev){try{'
+        'document.addEventListener("click",function(ev){'
         'var b=ev.target&&ev.target.closest?ev.target.closest(".orca-send"):null;'
         'if(!b)return;ev.preventDefault();'
         'var g=function(c){var el=document.querySelector("."+c);'
         'return el&&el.value?el.value.trim():"";};'
-        'var NL=String.fromCharCode(10);'
-        'var W={de:["Anfrage ueber die Website","Name","E-Mail","Fahrzeug","Nachricht"],'
-        'en:["Enquiry via the website","Name","Email","Vehicle","Message"],'
-        'fr:["Demande via le site","Nom","E-mail","Vehicule","Message"]};'
+        'var W={'
+        'de:["Name","E-Mail","Fahrzeug","Nachricht","Bitte E-Mail und Nachricht angeben.",'
+        '"Wird gesendet \\u2026","Vielen Dank, Ihre Nachricht ist unterwegs.",'
+        '"Senden nicht m\\u00f6glich. Bitte schreiben Sie an info@orca.gmbh.",'
+        '"Anfrage \\u00fcber die Website"],'
+        'en:["Name","Email","Vehicle","Message","Please provide your email and a message.",'
+        '"Sending \\u2026","Thank you, your message is on its way.",'
+        '"Sending failed. Please write to info@orca.gmbh.",'
+        '"Enquiry via the website"],'
+        'fr:["Nom","E-mail","V\\u00e9hicule","Message",'
+        '"Merci d\\u2019indiquer votre e-mail et un message.",'
+        '"Envoi \\u2026","Merci, votre message est en route.",'
+        '"\\u00c9chec de l\\u2019envoi. Merci d\\u2019\\u00e9crire \\u00e0 info@orca.gmbh.",'
+        '"Demande via le site"]};'
         'var L=(document.documentElement.getAttribute("lang")||"de").substring(0,2);'
         'var t=W[L]||W.de;'
+        'var st=document.querySelector(".orca-status");'
+        'var sag=function(s,ok){if(!st)return;st.textContent=s;'
+        'st.style.color=ok===false?"#7a2331":"";};'
         'var n=g("orca-f-name"),m=g("orca-f-email"),v=g("orca-f-vehicle"),x=g("orca-f-message");'
-        'if(!n&&!m&&!x){var f=document.querySelector(".orca-f-name");if(f)f.focus();return;}'
-        'var body=t[1]+": "+n+NL+t[2]+": "+m+NL+t[3]+": "+v+NL+NL+t[4]+":"+NL+x;'
-        'var subj=t[0]+(v?" - "+v:"");'
-        'window.location.href="mailto:info@orca.gmbh?subject="+encodeURIComponent(subj)'
-        '+"&body="+encodeURIComponent(body);'
-        '}catch(err){}},true);')
+        'if(!m||!x){sag(t[4],false);'
+        'var f=document.querySelector(m?".orca-f-message":".orca-f-email");if(f)f.focus();return;}'
+        'var hp=document.querySelector(".orca-f-hp");'
+        'if(hp&&hp.value){return;}'
+        'var d={};d[t[0]]=n;d[t[1]]=m;d[t[2]]=v;d[t[3]]=x;'
+        'd._subject=t[8]+(v?" \\u2013 "+v:"");d._captcha="false";d._template="table";'
+        'b.disabled=true;sag(t[5],true);'
+        f'fetch("{FORM_ENDPOINT}",{{method:"POST",'
+        'headers:{"Content-Type":"application/json","Accept":"application/json"},'
+        'body:JSON.stringify(d)}).then(function(r){'
+        'if(!r.ok)throw new Error("HTTP "+r.status);return r.json();}).then(function(){'
+        'sag(t[6],true);'
+        '["orca-f-name","orca-f-email","orca-f-vehicle","orca-f-message"].forEach(function(c){'
+        'var el=document.querySelector("."+c);if(el)el.value="";});'
+        'b.disabled=false;}).catch(function(){'
+        # Faellt der Dienst aus, geht die Anfrage nicht verloren: Der Hinweis
+        # nennt die Adresse, und der Knopf wird wieder bedienbar.
+        'sag(t[7],false);b.disabled=false;});'
+        '},true);')
     sub_once(old_boot, new_boot, "Kontaktformular verdrahten")
 
     if page == "Contact.html":
@@ -318,10 +355,23 @@ def transform(src: str, lang: str, page: str) -> str:
                  '<textarea class=\\"field orca-f-message\\" rows=\\"4\\" '
                  'placeholder=\\"{{ t.fMessage }}\\"',
                  "Klasse am Nachrichtenfeld")
+        # Honigtopf gegen Spam: Ein für Menschen unsichtbares Feld, das nur
+        # automatische Ausfüller bedienen. Ist es gefüllt, wird nicht gesendet.
         sub_once('<button type=\\"button\\" style=\\"margin-top:10px;',
+                 '<input class=\\"orca-f-hp\\" type=\\"text\\" tabindex=\\"-1\\" '
+                 'autocomplete=\\"off\\" aria-hidden=\\"true\\" '
+                 'style=\\"position:absolute; left:-9999px; width:1px; height:1px; '
+                 'opacity:0;\\">\\n      '
                  '<button type=\\"button\\" class=\\"orca-send\\" '
                  'style=\\"margin-top:10px;',
-                 "Klasse am Senden-Knopf")
+                 "Honigtopf und Klasse am Senden-Knopf")
+        # Rueckmeldung unter dem Knopf, damit der Absender weiss, was passiert.
+        sub_once('{{ t.fSend }}<\\u002Fbutton>',
+                 '{{ t.fSend }}<\\u002Fbutton>\\n      '
+                 '<div class=\\"orca-status\\" role=\\"status\\" '
+                 'style=\\"font-size:14px; line-height:1.6; min-height:22px; '
+                 'color:{{ textMuted }};\\"><\\u002Fdiv>',
+                 "Statusmeldung unter dem Knopf")
 
     # Hinweis: Hier stand kurzzeitig ein Listener, der bei der
     # Systemeinstellung "Bewegung reduzieren" beide Videos anhielt. Er ist
@@ -423,9 +473,32 @@ def transform(src: str, lang: str, page: str) -> str:
         '    /* Schliessen bleibt sichtbar, statt beim Scrollen wegzuwandern. */\\n'
         '    .orca-modal-close { position: fixed !important; top: 22px !important;\\n'
         '                        right: 22px !important; z-index: 2 !important; }\\n'
+        '    /* Antippflaechen. Die Sprachumschalter waren 15x14 Pixel gross —\\n'
+        '       empfohlen sind mindestens 44x44, darunter trifft man sie mit dem\\n'
+        '       Finger nicht verlaesslich. Gleiches gilt fuer die Menuepunkte. */\\n'
+        '    nav a.lang-switch { min-width: 44px !important; min-height: 44px !important;\\n'
+        '                        display: inline-flex !important;\\n'
+        '                        align-items: center !important;\\n'
+        '                        justify-content: center !important;\\n'
+        '                        font-size: 13px !important; }\\n'
+        '    /* Die Menuepunkte sind breit und daher leichter zu treffen; 38px\\n'
+        '       genuegen und halten die Kopfzeile flacher. */\\n'
+        '    nav a.nav-link { min-height: 38px !important; display: inline-flex !important;\\n'
+        '                     align-items: center !important; }\\n'
+        '    /* Die Schraegstriche zwischen den Sprachen entfallen: Mit 44px\\n'
+        '       breiten Feldern sind die Kuerzel ohnehin klar getrennt, und die\\n'
+        '       Striche wirkten zwischen den groesseren Flaechen verloren. */\\n'
+        '    nav a.lang-switch + span { display: none !important; }\\n'
+        '    header { padding-top: 12px !important; padding-bottom: 12px !important; }\\n'
+        '    nav { row-gap: 2px !important; }\\n'
         '    h1 { white-space: normal !important; }\\n'
         '    #orca-cookie-banner { padding: 16px 18px !important; }\\n'
         '  }\\n'
+        '  /* Die aktive Sprache wird unterstrichen wie der aktive Menuepunkt.\\n'
+        '     Vorher unterschied sie sich nur durch Transparenz, was bei dieser\\n'
+        '     Schriftgroesse kaum zu erkennen ist. */\\n'
+        '  a.lang-switch.is-active { border-bottom: 1px solid currentColor;\\n'
+        '                            padding-bottom: 2px; }\\n'
         '  /* Reserve fuer die Kopfzeile im mittleren Bereich. Die franzoesische\\n'
         '     Navigation ist mit 440px die breiteste (deutsch 431, englisch 411),\\n'
         '     bei 821px Fensterbreite blieben ihr nur 15px Reserve. Das genuegt,\\n'
