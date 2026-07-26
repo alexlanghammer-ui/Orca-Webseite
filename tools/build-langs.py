@@ -244,25 +244,13 @@ def transform(src: str, lang: str, page: str) -> str:
                     'rgba(10,9,7,0.82) 100%)')
         sub_once(old_grad, new_grad, "Hero-Verlauf")
 
-    # --- Systemeinstellung "Bewegung reduzieren" beachten ------------------
-    # Die Startseite spielt zwei Videos automatisch. Wer im Betriebssystem
-    # reduzierte Bewegung eingestellt hat, bekommt stattdessen das Standbild:
-    # automatisch bewegte Flächen sind für bewegungsempfindliche Menschen
-    # belastend. Angehängt an reveal(), weil die Videos erst existieren,
-    # sobald die Seite gerendert ist.
-    # Bewusst ereignisbasiert und nicht in reveal(): Ein einmaliger Aufruf
-    # trifft die Videos nicht zuverlässig, weil sie zu diesem Zeitpunkt noch
-    # nicht im Dokument stehen. Der Listener am Dokument greift unabhängig
-    # davon, wann ein Video auftaucht, und auch bei jedem Schleifenneustart.
-    old_boot = 'h.classList.add("__orca-boot");'
-    new_boot = (
-        'h.classList.add("__orca-boot");'
-        'document.addEventListener("play",function(e){try{'
-        'if(e.target&&e.target.tagName==="VIDEO"&&'
-        'matchMedia("(prefers-reduced-motion: reduce)").matches){'
-        'e.target.autoplay=false;e.target.loop=false;e.target.pause();}'
-        '}catch(err){}},true);')
-    sub_once(old_boot, new_boot, "Bewegungseinstellung beachten")
+    # Hinweis: Hier stand kurzzeitig ein Listener, der bei der
+    # Systemeinstellung "Bewegung reduzieren" beide Videos anhielt. Er ist
+    # entfernt worden, weil er die Videos für alle stillstehen liess, die
+    # diese Einstellung gesetzt haben — auch für den Betreiber selbst. Falls
+    # das Thema wieder aufgegriffen wird, gehört die Entscheidung dem
+    # Besucher: eine sichtbare Schaltfläche zum Anhalten statt automatisch
+    # unterdrücktem Abspielen.
 
     # --- Video im Abschnitt "Restauration in Bewegung" --------------------
     # Der 16:9-Rahmen des Entwurfs bleibt unverändert: restauration.mp4 wurde

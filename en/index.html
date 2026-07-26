@@ -308,7 +308,7 @@ document.addEventListener('DOMContentLoaded', async function() {
       'html.__orca-boot body{visibility:hidden !important}</' + 'style>' +
       '<script>(function(){' +
       'var h=document.documentElement,done=false;' +
-      'h.classList.add("__orca-boot");document.addEventListener("play",function(e){try{if(e.target&&e.target.tagName==="VIDEO"&&matchMedia("(prefers-reduced-motion: reduce)").matches){e.target.autoplay=false;e.target.loop=false;e.target.pause();}}catch(err){}},true);' +
+      'h.classList.add("__orca-boot");' +
       'function reveal(){if(done)return;done=true;h.classList.remove("__orca-boot");}' +
       'function ready(){var b=document.body;' +
       'return b&&b.firstElementChild&&b.textContent.indexOf("{{")===-1;}' +
