@@ -8,28 +8,28 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.orca.gmbh/"/>
   </url>
   <url>
-    <loc>https://www.orca.gmbh/About.html</loc>
-    <xhtml:link rel="alternate" hreflang="de" href="https://www.orca.gmbh/About.html"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.orca.gmbh/en/About.html"/>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://www.orca.gmbh/fr/About.html"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.orca.gmbh/About.html"/>
+    <loc>https://www.orca.gmbh/about/</loc>
+    <xhtml:link rel="alternate" hreflang="de" href="https://www.orca.gmbh/about/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.orca.gmbh/en/about/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.orca.gmbh/fr/about/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.orca.gmbh/about/"/>
   </url>
   <url>
-    <loc>https://www.orca.gmbh/Projects.html</loc>
-    <xhtml:link rel="alternate" hreflang="de" href="https://www.orca.gmbh/Projects.html"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.orca.gmbh/en/Projects.html"/>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://www.orca.gmbh/fr/Projects.html"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.orca.gmbh/Projects.html"/>
+    <loc>https://www.orca.gmbh/projects/</loc>
+    <xhtml:link rel="alternate" hreflang="de" href="https://www.orca.gmbh/projects/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.orca.gmbh/en/projects/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.orca.gmbh/fr/projects/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.orca.gmbh/projects/"/>
   </url>
   <url>
-    <loc>https://www.orca.gmbh/Contact.html</loc>
-    <xhtml:link rel="alternate" hreflang="de" href="https://www.orca.gmbh/Contact.html"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.orca.gmbh/en/Contact.html"/>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://www.orca.gmbh/fr/Contact.html"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.orca.gmbh/Contact.html"/>
+    <loc>https://www.orca.gmbh/contact/</loc>
+    <xhtml:link rel="alternate" hreflang="de" href="https://www.orca.gmbh/contact/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.orca.gmbh/en/contact/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.orca.gmbh/fr/contact/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.orca.gmbh/contact/"/>
   </url>
   <url>
-    <loc>https://www.orca.gmbh/Legal.html</loc>
+    <loc>https://www.orca.gmbh/legal/</loc>
   </url>
   <url>
     <loc>https://www.orca.gmbh/en/</loc>
@@ -39,25 +39,25 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.orca.gmbh/"/>
   </url>
   <url>
-    <loc>https://www.orca.gmbh/en/About.html</loc>
-    <xhtml:link rel="alternate" hreflang="de" href="https://www.orca.gmbh/About.html"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.orca.gmbh/en/About.html"/>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://www.orca.gmbh/fr/About.html"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.orca.gmbh/About.html"/>
+    <loc>https://www.orca.gmbh/en/about/</loc>
+    <xhtml:link rel="alternate" hreflang="de" href="https://www.orca.gmbh/about/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.orca.gmbh/en/about/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.orca.gmbh/fr/about/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.orca.gmbh/about/"/>
   </url>
   <url>
-    <loc>https://www.orca.gmbh/en/Projects.html</loc>
-    <xhtml:link rel="alternate" hreflang="de" href="https://www.orca.gmbh/Projects.html"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.orca.gmbh/en/Projects.html"/>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://www.orca.gmbh/fr/Projects.html"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.orca.gmbh/Projects.html"/>
+    <loc>https://www.orca.gmbh/en/projects/</loc>
+    <xhtml:link rel="alternate" hreflang="de" href="https://www.orca.gmbh/projects/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.orca.gmbh/en/projects/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.orca.gmbh/fr/projects/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.orca.gmbh/projects/"/>
   </url>
   <url>
-    <loc>https://www.orca.gmbh/en/Contact.html</loc>
-    <xhtml:link rel="alternate" hreflang="de" href="https://www.orca.gmbh/Contact.html"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.orca.gmbh/en/Contact.html"/>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://www.orca.gmbh/fr/Contact.html"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.orca.gmbh/Contact.html"/>
+    <loc>https://www.orca.gmbh/en/contact/</loc>
+    <xhtml:link rel="alternate" hreflang="de" href="https://www.orca.gmbh/contact/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.orca.gmbh/en/contact/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.orca.gmbh/fr/contact/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.orca.gmbh/contact/"/>
   </url>
   <url>
     <loc>https://www.orca.gmbh/fr/</loc>
@@ -67,24 +67,24 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.orca.gmbh/"/>
   </url>
   <url>
-    <loc>https://www.orca.gmbh/fr/About.html</loc>
-    <xhtml:link rel="alternate" hreflang="de" href="https://www.orca.gmbh/About.html"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.orca.gmbh/en/About.html"/>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://www.orca.gmbh/fr/About.html"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.orca.gmbh/About.html"/>
+    <loc>https://www.orca.gmbh/fr/about/</loc>
+    <xhtml:link rel="alternate" hreflang="de" href="https://www.orca.gmbh/about/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.orca.gmbh/en/about/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.orca.gmbh/fr/about/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.orca.gmbh/about/"/>
   </url>
   <url>
-    <loc>https://www.orca.gmbh/fr/Projects.html</loc>
-    <xhtml:link rel="alternate" hreflang="de" href="https://www.orca.gmbh/Projects.html"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.orca.gmbh/en/Projects.html"/>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://www.orca.gmbh/fr/Projects.html"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.orca.gmbh/Projects.html"/>
+    <loc>https://www.orca.gmbh/fr/projects/</loc>
+    <xhtml:link rel="alternate" hreflang="de" href="https://www.orca.gmbh/projects/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.orca.gmbh/en/projects/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.orca.gmbh/fr/projects/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.orca.gmbh/projects/"/>
   </url>
   <url>
-    <loc>https://www.orca.gmbh/fr/Contact.html</loc>
-    <xhtml:link rel="alternate" hreflang="de" href="https://www.orca.gmbh/Contact.html"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.orca.gmbh/en/Contact.html"/>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://www.orca.gmbh/fr/Contact.html"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.orca.gmbh/Contact.html"/>
+    <loc>https://www.orca.gmbh/fr/contact/</loc>
+    <xhtml:link rel="alternate" hreflang="de" href="https://www.orca.gmbh/contact/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.orca.gmbh/en/contact/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.orca.gmbh/fr/contact/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.orca.gmbh/contact/"/>
   </url>
 </urlset>

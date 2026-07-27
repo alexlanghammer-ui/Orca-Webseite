@@ -267,23 +267,44 @@ def datenschutz_markup() -> str:
     return '\\n    ' + '\\n    '.join(teile)
 
 
+# Adressen ohne .html: Jede Seite liegt als index.html in einem eigenen Ordner,
+# damit der Server sie unter dem Ordnernamen ausliefert. Das ist die einzige Art
+# sprechender Adressen, die ohne Servereinstellungen funktioniert — GitHub Pages
+# kennt keine Umschreibungsregeln.
+SLUG = {
+    "index.html": "",
+    "About.html": "about/",
+    "Projects.html": "projects/",
+    "Contact.html": "contact/",
+    "Legal.html": "legal/",
+}
+
+
+def out_path(lang: str, page: str) -> str:
+    """Ablageort im Repo, z. B. 'en/about/index.html'."""
+    pref = "" if lang == "de" else f"{lang}/"
+    return f"{pref}{SLUG[page]}index.html"
+
+
+def link_for(lang: str, page: str) -> str:
+    """Verweis innerhalb der Seite, immer von der Wurzel aus.
+
+    Absolut und nicht relativ, weil dieselbe Vorlage künftig in
+    unterschiedlichen Tiefen liegt (/about/ und /en/about/). Ein relativer Pfad
+    müsste je Ablageort anders lauten und wäre eine ständige Fehlerquelle.
+    """
+    pref = "" if lang == "de" else f"{lang}/"
+    return f"/{pref}{SLUG[page]}"
+
+
 def url_for(lang: str, page: str) -> str:
-    """Öffentliche Adresse einer Seite. Die Startseite läuft über den Ordner."""
-    prefix = "" if lang == "de" else f"/{lang}"
-    if page == "index.html":
-        return f"{BASE}{prefix}/"
-    return f"{BASE}{prefix}/{page}"
+    """Öffentliche Adresse einer Seite."""
+    return f"{BASE}{link_for(lang, page)}"
 
 
 def switch_href(from_lang: str, to_lang: str, page: str) -> str:
-    """Relativer Pfad vom Sprachumschalter zur Zielsprache derselben Seite."""
-    if from_lang == to_lang:
-        return f"./{page}"
-    if from_lang == "de":
-        return f"./{to_lang}/{page}"
-    if to_lang == "de":
-        return f"../{page}"
-    return f"../{to_lang}/{page}"
+    """Ziel des Sprachumschalters: dieselbe Seite in der anderen Sprache."""
+    return link_for(to_lang, page)
 
 
 # Die Rechtstexte (Impressum, Datenschutzerklärung) liegen nur auf Deutsch vor
@@ -294,25 +315,94 @@ def switch_href(from_lang: str, to_lang: str, page: str) -> str:
 GERMAN_ONLY = ("Legal.html",)
 
 
-def head_links(lang: str, page: str) -> str:
-    """canonical und hreflang für den *äusseren* Head, als normales HTML.
+OG_IMAGE_ALT = {
+    "de": "Historischer Porsche-Rennwagen auf einer Passstrasse",
+    "en": "Historic Porsche race car on a mountain pass road",
+    "fr": "Voiture de course Porsche historique sur une route de col",
+}
 
-    Nicht in den Vorlagen-Head: dort verwaltet die helmet-Mechanik der Seite
-    die Tags selbst und entfernt Fremdes wieder. Der äussere Head ist zudem
-    das, was Crawler ohne JavaScript sofort sehen.
+
+def head_links(lang: str, page: str) -> str:
+    """Der komplette Kopfbereich des *äusseren* Dokuments, als normales HTML.
+
+    Das ist alles, was ohne JavaScript zu sehen ist — und damit das, worauf
+    sich Crawler und Vorschauen von Messengern verlassen müssen. Beschreibung,
+    og-Angaben und strukturierte Daten stehen zwar auch in der Vorlage, die
+    aber erst entsteht, wenn das JS-Paket entpackt ist. Nicht jeder Abholer
+    tut das.
+
+    Bewusst nicht in den Vorlagen-Head: Dort verwaltet die helmet-Mechanik der
+    Seite die Tags selbst und entfernt Fremdes wieder.
     """
+    title, desc = META[page][lang]
+    seite = url_for(lang, page)
+    out = [
+        '<meta name="viewport" content="width=device-width, initial-scale=1">',
+        f'<meta name="description" content="{desc}">',
+        '<meta name="robots" content="index, follow">',
+    ]
+
     if page in GERMAN_ONLY:
         # Nur ein Kanonisierungs-Hinweis, keine hreflang-Angaben: Die Seite
         # ist inhaltlich in allen Ordnern deutsch, widersprüchliche
         # Sprachsignale wären schlechter als keine.
-        return f'\n<link rel="canonical" href="{url_for("de", page)}">'
+        out.append(f'<link rel="canonical" href="{url_for("de", page)}">')
+    else:
+        out.append(f'<link rel="canonical" href="{seite}">')
+        for other in LANGS:
+            out.append(f'<link rel="alternate" hreflang="{other}" '
+                       f'href="{url_for(other, page)}">')
+        out.append(f'<link rel="alternate" hreflang="x-default" '
+                   f'href="{url_for("de", page)}">')
 
-    out = [f'<link rel="canonical" href="{url_for(lang, page)}">']
-    for other in LANGS:
-        out.append(f'<link rel="alternate" hreflang="{other}" '
-                   f'href="{url_for(other, page)}">')
-    out.append(f'<link rel="alternate" hreflang="x-default" '
-               f'href="{url_for("de", page)}">')
+    # Vorschau in Messengern und sozialen Netzen. Ohne og:image zeigen WhatsApp,
+    # LinkedIn und Co. nur eine leere Fläche.
+    out += [
+        '<meta property="og:type" content="website">',
+        '<meta property="og:site_name" content="ORCA Restoration GmbH">',
+        f'<meta property="og:locale" content="{OG_LOCALE[lang]}">',
+        f'<meta property="og:title" content="{title}">',
+        f'<meta property="og:description" content="{desc}">',
+        f'<meta property="og:url" content="{seite}">',
+        f'<meta property="og:image" content="{BASE}/og-image.jpg">',
+        '<meta property="og:image:width" content="1200">',
+        '<meta property="og:image:height" content="630">',
+        f'<meta property="og:image:alt" content="{OG_IMAGE_ALT[lang]}">',
+        '<meta name="twitter:card" content="summary_large_image">',
+        f'<meta name="twitter:title" content="{title}">',
+        f'<meta name="twitter:description" content="{desc}">',
+        f'<meta name="twitter:image" content="{BASE}/og-image.jpg">',
+    ]
+
+    # Symbol der Seite. Google zeigt es in den Ergebnissen auf dem Handy an,
+    # es ist also nicht nur Zierde. Das SVG skaliert, das PNG deckt ältere
+    # Browser ab, apple-touch-icon gilt beim Ablegen auf dem Startbildschirm.
+    out += [
+        '<link rel="icon" href="/favicon.svg" type="image/svg+xml">',
+        '<link rel="icon" href="/favicon-48.png" sizes="48x48" type="image/png">',
+        '<link rel="apple-touch-icon" href="/apple-touch-icon.png">',
+        '<meta name="theme-color" content="#1b1a17">',
+    ]
+
+    # Strukturierte Daten auch ohne JavaScript. Inhaltlich dieselbe Angabe wie
+    # in der Vorlage, ergänzt um das Instagram-Profil. Bewusst keine
+    # Öffnungszeiten und keine Koordinaten: Beides ist nicht belegt, und
+    # falsche strukturierte Daten sind schlechter als keine.
+    ld = (
+        '{"@context":"https://schema.org","@type":"AutoRepair",'
+        '"name":"ORCA Restoration GmbH",'
+        f'"description":"{SCHEMA_DESC[lang]}",'
+        f'"image":"{SCHEMA_IMAGE}",'
+        f'"url":"{url_for(lang, "index.html")}",'
+        '"telephone":"+4970423743267","email":"info@orca.gmbh",'
+        '"vatID":"DE815733570",'
+        f'"sameAs":["{INSTAGRAM_URL}"],'
+        '"address":{"@type":"PostalAddress",'
+        '"streetAddress":"Robert-Bosch-Str. 4","postalCode":"71735",'
+        '"addressLocality":"Eberdingen","addressCountry":"DE"}}'
+    )
+    out.append(f'<script type="application/ld+json">{ld}</script>')
+
     return "\n" + "\n".join(out)
 
 
@@ -337,12 +427,12 @@ def transform(src: str, lang: str, page: str) -> str:
         sub_once("state = { lang: 'de'", f"state = {{ lang: '{lang}'",
                  "Sprachzustand")
 
-    # --- Bildpfade: aus einem Unterordner liegt images/ eine Ebene höher ---
-    if lang != "de":
-        s = s.replace("'images/", "'../images/")
-        # Dasselbe für das Video im Wurzelverzeichnis.
-        s = s.replace('src=\\"./restauration.mp4\\"',
-                      'src=\\"../restauration.mp4\\"')
+    # --- Pfade zu Bildern und Videos: von der Wurzel aus ------------------
+    # Die Seiten liegen in unterschiedlichen Tiefen (/, /about/, /en/about/).
+    # Ein relativer Pfad müsste je Ablageort anders lauten; von der Wurzel aus
+    # ist er für alle gleich.
+    s = s.replace("'images/", "'/images/")
+    s = s.replace('src=\\"./restauration.mp4\\"', 'src=\\"/restauration.mp4\\"')
 
     # --- Sprachumschalter: aus Klick-Handlern werden echte Links ----------
     # Die Farbvariable heisst je Seite anders (langDeLight auf der Startseite
@@ -430,7 +520,7 @@ def transform(src: str, lang: str, page: str) -> str:
                     'placeholder=\\"Porsche Rennwagen – Titelbild (später Video)\\" '
                     'style=\\"position:absolute; inset:0; width:100%; height:100%;\\" '
                     'src=\\"e264a4e1-5ee2-422f-9bcf-5a715b5d17b3\\"><\\u002Fimage-slot>')
-        pre = "../" if lang != "de" else "./"
+        pre = "/"
         new_video = (
             f'<video autoplay=\\"true\\" muted=\\"true\\" loop=\\"true\\" '
             f'playsinline=\\"true\\" preload=\\"auto\\" '
@@ -579,7 +669,32 @@ def transform(src: str, lang: str, page: str) -> str:
         'nv.classList.remove("orca-open");'
         'var s=nv.querySelector(".orca-burger");'
         'if(s){s.setAttribute("aria-expanded","false");s.focus();}'
-        '});')
+        '});'
+        # Der Verweis auf die Rechtstexte im Cookie-Hinweis lautet
+        # "./Legal.html" und steckt im komprimierten Paket, nicht in der
+        # Vorlage — im Text ist er deshalb nicht zu ersetzen. Von /about/ aus
+        # zeigte er auf /about/Legal.html und damit ins Leere. Hier wird er im
+        # fertigen Baum auf die sprechende Adresse gesetzt. Der Beobachter ist
+        # noetig, weil der Hinweis nach dem ersten Aufbau erscheint und die
+        # Seite bei Interaktionen neu zeichnet.
+        # Bewusst ueber getElementsByTagName und nicht ueber einen
+        # Attributselektor: Der eingefuegte Code steht in der Datei innerhalb
+        # eines mit einfachen Anfuehrungszeichen begrenzten JS-Strings. Ein
+        # Selektor wie a[href$="Legal.html"] braeuchte Anfuehrungszeichen um den
+        # Wert und wuerde diesen String zerreissen — genau daran ist ein erster
+        # Versuch gescheitert (Unexpected identifier). Hier kommen nur doppelte
+        # Anfuehrungszeichen vor.
+        'var orcaLegal=function(){'
+        'var L=(document.documentElement.getAttribute("lang")||"de").substring(0,2);'
+        'var ziel=L==="de"?"/legal/":"/"+L+"/legal/";'
+        'var a=document.getElementsByTagName("a");'
+        'for(var i=0;i<a.length;i++){'
+        'var h=a[i].getAttribute("href")||"";'
+        'if(h.indexOf("Legal.html")>=0)a[i].setAttribute("href",ziel);}};'
+        'orcaLegal();'
+        'if(window.MutationObserver){'
+        'new MutationObserver(orcaLegal).observe(document.documentElement,'
+        '{childList:true,subtree:true});}')
     sub_once(old_boot, new_boot, "Kontaktformular verdrahten")
 
     if page == "Contact.html":
@@ -922,12 +1037,22 @@ def transform(src: str, lang: str, page: str) -> str:
                      '      <\\u002Fdiv>')
         sub_once(old_hours, new_hours, "Instagram im Kontaktblock")
 
-    # --- Startseiten-Links auf die Ordnerform bringen ---------------------
-    # Logo, "Start" in der Navigation und der Sprachumschalter zeigten auf
-    # ./index.html. Der Server liefert die Startseite auch unter dem Ordner
-    # aus, dann steht in der Adresszeile nur die Domain statt .../index.html.
-    s = re.sub(r'href=\\"((?:\.\./|\./)(?:en/|fr/)?)index\.html\\"',
-               r'href=\\"\1\\"', s)
+    # --- Interne Verweise auf die sprechenden Adressen --------------------
+    # Aus ./About.html wird /about/ (bzw. /en/about/), aus ./ und ./index.html
+    # die Startseite der jeweiligen Sprache. Alle Verweise laufen von der Wurzel
+    # aus, weil dieselbe Vorlage in verschiedenen Tiefen liegt.
+    for ziel, slug in SLUG.items():
+        if ziel == "index.html":
+            continue
+        muster = f'href=\\"./{ziel}\\"'
+        if muster not in s:
+            raise SystemExit(f"{page} [{lang}]: kein Verweis auf {ziel} gefunden")
+        s = s.replace(muster, f'href=\\"{link_for(lang, ziel)}\\"')
+
+    # Startseite: ./ und ./index.html, dazu die vom Sprachumschalter bereits
+    # gesetzten absoluten Pfade nicht anfassen.
+    s = re.sub(r'href=\\"\./(?:index\.html)?\\"',
+               f'href=\\\\"{link_for(lang, "index.html")}\\\\"', s)
 
     # --- Kopfbereich der Vorlage -----------------------------------------
     sub_once(f"<title>{de_title}<\\u002Ftitle>",
@@ -989,6 +1114,19 @@ def main() -> None:
     originals = {}
     for page in PAGES:
         text = (root / page).read_text(encoding="utf-8")
+        # Nach einem Lauf steht an dieser Stelle nur noch ein
+        # Weiterleitungs-Stummel, denn der Inhalt liegt jetzt unter /about/ und
+        # so weiter. Ohne diese Pruefung liefe das Skript in eine
+        # schwerverstaendliche Fehlermeldung mitten im Umbau.
+        if "__orca-boot" not in text:
+            raise SystemExit(
+                f"{page} ist kein Export (Kennung __orca-boot fehlt) — nach\n"
+                "einem Lauf steht dort nur die Weiterleitung. Erst die Exporte\n"
+                "wiederherstellen:\n"
+                "  git checkout 9f13efb -- "
+                + " ".join(PAGES) + "\n"
+                "(oder den Stand des letzten Editor-Exports einspielen)"
+            )
         if "hreflang" in text or "lang-switch\\\" style=\\\"color" in text:
             raise SystemExit(
                 f"{page} wurde offenbar schon umgebaut (hreflang gefunden).\n"
@@ -996,17 +1134,99 @@ def main() -> None:
             )
         originals[page] = text
 
+    # Alte Ausgabeordner weg, damit nichts Veraltetes liegen bleibt.
     for lang in LANGS:
-        target_dir = root if lang == "de" else root / lang
-        if lang != "de":
-            if target_dir.exists():
-                shutil.rmtree(target_dir)
-            target_dir.mkdir()
+        if lang != "de" and (root / lang).exists():
+            shutil.rmtree(root / lang)
+    for page in PAGES:
+        ordner = SLUG[page].rstrip("/")
+        if ordner and (root / ordner).exists():
+            shutil.rmtree(root / ordner)
+
+    for lang in LANGS:
         for page in PAGES:
-            out = transform(originals[page], lang, page)
-            (target_dir / page).write_text(out, encoding="utf-8")
-        print(f"  {lang}: {len(PAGES)} Seiten -> "
-              f"{target_dir.relative_to(root) if lang != 'de' else '.'}")
+            ziel = root / out_path(lang, page)
+            ziel.parent.mkdir(parents=True, exist_ok=True)
+            ziel.write_text(transform(originals[page], lang, page),
+                            encoding="utf-8")
+        print(f"  {lang}: " + ", ".join(
+            "/" + out_path(lang, p).removesuffix("index.html") for p in PAGES))
+
+    # --- Weiterleitungen von den alten Adressen ---------------------------
+    # Die Seiten lagen bis jetzt unter /About.html. Wer einen solchen Link
+    # gespeichert hat — oder wessen Suchmaschine ihn kennt — soll nicht im
+    # Nichts landen. GitHub Pages kann keine echten Umleitungen (301), deshalb
+    # der übliche Weg: canonical nennt das Ziel, refresh und ein Skript
+    # schicken den Besucher hin.
+    stummel = 0
+    for lang in LANGS:
+        for page in PAGES:
+            if page == "index.html":
+                continue
+            pref = "" if lang == "de" else f"{lang}/"
+            ziel_url = link_for(lang, page)
+            alt = root / f"{pref}{page}"
+            alt.write_text(
+                "<!doctype html>\n"
+                f'<html lang="{lang}">\n<head>\n<meta charset="utf-8">\n'
+                f'<link rel="canonical" href="{url_for(lang, page)}">\n'
+                f'<meta http-equiv="refresh" content="0; url={ziel_url}">\n'
+                "<title>ORCA Restoration GmbH</title>\n</head>\n<body>\n"
+                f'<p>Diese Seite liegt jetzt unter <a href="{ziel_url}">'
+                f'{BASE}{ziel_url}</a>.</p>\n'
+                f'<script>location.replace("{ziel_url}");</script>\n'
+                "</body>\n</html>\n",
+                encoding="utf-8")
+            stummel += 1
+
+    # Derselbe Stummel zusätzlich in jedem Seitenordner. Grund ist der Verweis
+    # im Cookie-Hinweis: Er lautet "./Legal.html", steckt im komprimierten
+    # Paket und zeigt von /about/ aus auf /about/Legal.html. Im Browser wird er
+    # nach dem Aufbau korrigiert; wer kein JavaScript ausführt und ihm folgt,
+    # landet so trotzdem auf einer Weiterleitung statt auf einem Fehler.
+    for lang in LANGS:
+        pref = "" if lang == "de" else f"{lang}/"
+        vorlage = (root / f"{pref}Legal.html").read_text(encoding="utf-8")
+        for page in PAGES:
+            ordner = SLUG[page]
+            if not ordner:
+                continue
+            (root / f"{pref}{ordner}Legal.html").write_text(vorlage,
+                                                            encoding="utf-8")
+            stummel += 1
+    print(f"  {stummel} Weiterleitungen von den alten .html-Adressen")
+
+    # --- 404-Seite --------------------------------------------------------
+    # GitHub Pages liefert unter /404.html eine eigene Seite aus, wenn nichts
+    # passt. Ohne diese Datei steht dort GitHubs Standardtext mit dessen Logo.
+    (root / "404.html").write_text(
+        "<!doctype html>\n"
+        '<html lang="de">\n<head>\n<meta charset="utf-8">\n'
+        '<meta name="viewport" content="width=device-width, initial-scale=1">\n'
+        "<title>Seite nicht gefunden – ORCA Restoration GmbH</title>\n"
+        '<meta name="robots" content="noindex">\n'
+        '<link rel="icon" href="/favicon.svg" type="image/svg+xml">\n'
+        '<link rel="icon" href="/favicon-48.png" sizes="48x48" type="image/png">\n'
+        "<style>\n"
+        "  body { margin:0; min-height:100vh; display:flex; align-items:center;\n"
+        "         justify-content:center; background:#1b1a17; color:#f6f3ee;\n"
+        "         font-family:'Helvetica Neue',Arial,sans-serif;\n"
+        "         text-align:center; padding:32px; box-sizing:border-box; }\n"
+        "  .z { font-size:64px; letter-spacing:0.04em; margin:0 0 12px;\n"
+        "       font-weight:300; }\n"
+        "  p { font-size:16px; line-height:1.7; color:rgba(246,243,238,0.72);\n"
+        "      margin:0 0 28px; }\n"
+        "  a { color:#f6f3ee; font-size:12px; letter-spacing:0.14em;\n"
+        "      text-transform:uppercase; text-decoration:none;\n"
+        "      border:1px solid rgba(246,243,238,0.4); padding:14px 26px;\n"
+        "      display:inline-block; }\n"
+        "</style>\n</head>\n<body>\n<div>\n"
+        '  <p class="z">404</p>\n'
+        "  <p>Diese Seite gibt es nicht mehr oder hat noch nie existiert.</p>\n"
+        '  <a href="/">Zur Startseite</a>\n'
+        "</div>\n</body>\n</html>\n",
+        encoding="utf-8")
+    print("  404.html")
 
     # --- sitemap.xml ------------------------------------------------------
     lines = ['<?xml version="1.0" encoding="UTF-8"?>',
