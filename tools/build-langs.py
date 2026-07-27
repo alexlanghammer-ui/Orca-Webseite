@@ -651,9 +651,12 @@ def transform(src: str, lang: str, page: str) -> str:
         '    h1 { white-space: normal !important; }\\n'
         '    #orca-cookie-banner { padding: 16px 18px !important; }\\n'
         '  }')
-    # Klappflaeche und Trennlinien richten sich nach der Kopfzeile: Auf der
-    # Startseite liegt sie ueber dem Video und ist dunkel, auf den Unterseiten
-    # hell wie der Seitenhintergrund.
+    # Die Klappflaeche ist auf allen Seiten hell. Auf der Startseite war sie
+    # zunaechst dunkel, weil die Kopfzeile dort ueber dem Video liegt und ihre
+    # Schrift hell ist — im Gebrauch wirkte es aber wie zwei verschiedene Menues.
+    # Deshalb einheitlich hell, und die Menuepunkte darin bekommen die dunkle
+    # Schriftfarbe zugewiesen (inline stehen sie auf der Startseite hell und
+    # waeren auf hellem Grund unsichtbar).
     # Bewusst als Zahlenwert und nicht als {{ bg }}/{{ line }}: Im Stylesheet
     # werden diese Platzhalter nicht ersetzt. Auf Legal.html bleiben sie sogar
     # unveraendert stehen, auf den uebrigen Seiten wird der Text erst nach dem
@@ -663,9 +666,9 @@ def transform(src: str, lang: str, page: str) -> str:
     # Ersetzung dagegen, deshalb steht {{ text }} unten am Balken. Die Werte
     # entsprechen dem Farbschema des Entwurfs; sie muessen nachgezogen werden,
     # falls sich dieses aendert.
-    panel_bg = "rgba(10,9,7,0.96)" if page == "index.html" else "#f6f3ee"
-    panel_line = ("rgba(248,245,239,0.18)" if page == "index.html"
-                  else "#ddd7cc")
+    panel_bg = "#f6f3ee"
+    panel_line = "#ddd7cc"
+    panel_text = "#1b1a17"
     new_media = (
         '@media (max-width: 820px) {\\n'
         '    /* Kopfzeile bleibt einzeilig: Logo links, Sprachen und\\n'
@@ -709,7 +712,8 @@ def transform(src: str, lang: str, page: str) -> str:
         '                                   box-sizing: border-box; }\\n'
         '    nav.orca-open .orca-navlinks a.nav-link {\\n'
         '        min-height: 50px !important; font-size: 12px !important;\\n'
-        '        border-bottom: 0 !important; padding: 0 0 0 14px !important; }\\n'
+        '        border-bottom: 0 !important; padding: 0 0 0 14px !important;\\n'
+        f'        color: {panel_text} !important; }}\\n'
         '    /* Die aktuelle Seite ist im Export durch border-bottom im\\n'
         '       style-Attribut markiert. Untereinander wirkt eine Unterkante\\n'
         '       wie eine Trennlinie, deshalb wandert die Markierung an die\\n'
@@ -736,14 +740,18 @@ def transform(src: str, lang: str, page: str) -> str:
         '    image-slot, video, img { max-width: 100% !important; }\\n'
         '    /* Hero: Text und Schaltflaeche an den Seitenrand. */\\n'
         '    .orca-hero-text { left: 22px !important; right: 22px !important; }\\n'
-        '    /* Hero flacher. Ein 16:9-Video wird in einem hochformatigen Fenster\\n'
-        '       bei object-fit:cover stark seitlich beschnitten — bei 100vh gehen\\n'
-        '       rund drei Viertel der Bildbreite verloren. Flacher heisst mehr\\n'
-        '       sichtbare Breite und weniger Videowand. */\\n'
+        '    /* Hero ueber den ganzen Bildschirm. Zwei Angaben zur Hoehe mit\\n'
+        '       Absicht: dvh meint die tatsaechlich sichtbare Hoehe, vh auf dem\\n'
+        '       iPhone dagegen das Fenster OHNE Adressleiste und ist damit\\n'
+        '       groesser als der sichtbare Bereich. Wer dvh nicht kennt, behaelt\\n'
+        '       den vh-Wert. Ein 16:9-Video wird im Hochformat bei\\n'
+        '       object-fit:cover stark seitlich beschnitten — das ist der Preis\\n'
+        '       fuer das bildschirmfuellende Bild und so gewollt. */\\n'
         '    /* Kein Seitenabstand am Hero: Er ist randlos, und weil er\\n'
         '       width:100% ohne border-box traegt, kaemen die 22px oben drauf —\\n'
         '       die Seite liess sich dadurch 44px seitlich verschieben. */\\n'
-        '    .orca-hero { height: 74vh !important; min-height: 500px !important;\\n'
+        '    .orca-hero { height: 100vh !important; height: 100dvh !important;\\n'
+        '                 min-height: 420px !important;\\n'
         '                 padding-left: 0 !important; padding-right: 0 !important; }\\n'
         '    /* Innenabstand des Kennzahlen-Rasters zuruecknehmen, sonst bleiben\\n'
         '       von 346px nur 234px fuer den Inhalt. */\\n'
