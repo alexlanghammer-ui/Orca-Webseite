@@ -466,6 +466,38 @@ def transform(src: str, lang: str, page: str) -> str:
                f'<\\u002Fa>')
         s = re.sub(pattern, lambda _m, n=new: n, s, count=1)
 
+    # --- Ueberschriften in aufsteigender Ordnung --------------------------
+    # Auf "Ueber uns" folgen dem h1 drei h3, erst danach kommen h2 — eine
+    # uebersprungene Stufe. Screenreader lesen die Gliederung daran ab, und
+    # Lighthouse zog dafuer Punkte ab ("Heading elements are not in a
+    # sequentially-descending order"). Die drei sind inhaltlich Abschnitte
+    # erster Ordnung und werden zu h2. Die Schriftgroesse steht im
+    # style-Attribut und bleibt unveraendert, die Darstellung also auch.
+    if page == "About.html":
+        alt_h3 = ('<h3 style=\\"font-family:\'Cormorant Garamond\',serif; '
+                  'font-weight:400; font-size:24px; margin:0 0 10px;\\">')
+        treffer = re.findall(re.escape(alt_h3) + r'(.{0,120}?)<\\u002Fh3>', s)
+        if len(treffer) != 3:
+            raise SystemExit(
+                f"{page} [{lang}]: {len(treffer)} Ueberschriften mit 24px "
+                "erwartet 3")
+        s = re.sub(re.escape(alt_h3) + r'(.{0,120}?)<\\u002Fh3>',
+                   lambda m: alt_h3.replace('<h3', '<h2') + m.group(1)
+                   + '<\\u002Fh2>', s)
+
+    # --- Hauptbereich auszeichnen -----------------------------------------
+    # Zwischen Kopf- und Fusszeile stehen die Abschnitte ohne umgebendes
+    # Element. Screenreader bieten damit keinen Sprung zum Inhalt an, und
+    # Lighthouse meldete "Document does not have a main landmark". Ein <main>
+    # um alles zwischen den beiden loest das, ohne die Darstellung zu
+    # beruehren: Das Element hat keine eigenen Abstaende, und keine der Regeln
+    # spricht direkte Kinder des Wurzelelements an.
+    sub_once('<\\u002Fheader>', '<\\u002Fheader>\\n\\n  <main>',
+             "Beginn des Hauptbereichs")
+    sub_once('<footer style=\\"padding:56px 56px 40px;',
+             '<\\u002Fmain>\\n\\n  <footer style=\\"padding:56px 56px 40px;',
+             "Ende des Hauptbereichs")
+
     # --- Handy: Menuepunkte in ein Burger-Menue --------------------------
     # Vorher standen vier Menuepunkte und drei Sprachkuerzel gemeinsam in der
     # Kopfzeile. Auf dem Handy brach das in zwei Reihen um und wirkte gedraengt;
@@ -714,7 +746,30 @@ def transform(src: str, lang: str, page: str) -> str:
         'var klein=window.matchMedia&&window.matchMedia("(max-width: 820px)").matches;'
         'v.setAttribute("src",klein?"/hero-mobile.mp4":"/hero.mp4");'
         'var w=v.play();if(w&&w.catch)w.catch(function(){});};'
-        'var orcaNach=function(){orcaLegal();orcaHero();};'
+        # Titel und meta-Angaben stehen nach dem Rendern im Koerper statt im
+        # Kopfbereich — die Vorlage traegt sie als gewoehnliche Elemente im
+        # Komponentenbaum. Ein Titel dort wirkt zwar noch, eine Beschreibung
+        # aber nicht: Google liest sie nur im Kopfbereich, und Lighthouse
+        # meldete deshalb "Document does not have a meta description".
+        # Hier werden sie umgehaengt, wobei gleichnamige Angaben im Kopf
+        # vorher entfernt werden, damit nichts doppelt steht. Die Listen sind
+        # lebendig, das Umhaengen leert sie also von selbst.
+        'var orcaKopf=function(){'
+        'if(!document.body||!document.head)return;'
+        'var t=document.body.getElementsByTagName("title");'
+        'while(t.length){'
+        'var a=document.head.getElementsByTagName("title");'
+        'while(a.length)a[0].parentNode.removeChild(a[0]);'
+        'document.head.appendChild(t[0]);}'
+        'var m=document.body.getElementsByTagName("meta");'
+        'while(m.length){var e=m[0];'
+        'var n=e.getAttribute("name")||e.getAttribute("property")||"";'
+        'var h=document.head.getElementsByTagName("meta");'
+        'for(var i=h.length-1;i>=0;i--){'
+        'var hn=h[i].getAttribute("name")||h[i].getAttribute("property")||"";'
+        'if(n&&hn===n)h[i].parentNode.removeChild(h[i]);}'
+        'document.head.appendChild(e);}};'
+        'var orcaNach=function(){orcaLegal();orcaHero();orcaKopf();};'
         'orcaNach();'
         'if(window.MutationObserver){'
         'new MutationObserver(orcaNach).observe(document.documentElement,'
@@ -945,6 +1000,15 @@ def transform(src: str, lang: str, page: str) -> str:
         '    h1 { white-space: normal !important; }\\n'
         '    #orca-cookie-banner { padding: 16px 18px !important; }\\n'
         '  }\\n'
+        '  /* Der Hinweistext ueber der Karte stand mit 4.41:1 auf dem helleren\\n'
+        '     Kasten — verlangt sind 4.5:1 fuer kleine Schrift. Etwas dunkler\\n'
+        '     ergibt 6.0:1. Der Text kommt aus dem komprimierten Paket und ist\\n'
+        '     im Quelltext nicht zu erreichen, deshalb ueber das style-Attribut.\\n'
+        '     Beide Schreibweisen, weil die rendernde Schicht Leerzeichen in die\\n'
+        '     Werte einfuegt. Betrifft genau dieses eine Element, nachgemessen\\n'
+        '     ueber alle fuenf Seiten. */\\n'
+        '  [style*=\\"max-width: 360px\\"],\\n'
+        '  [style*=\\"max-width:360px\\"] { color: #57514c !important; }\\n'
         '  /* Mit dem Finger liess sich die Seite nicht scrollen, solange er auf\\n'
         '     einem Bild lag: Die image-slot-Elemente des Exports fangen die\\n'
         '     Beruehrung ab und unterdruecken die Standardgeste. Gemessen auf\\n'
