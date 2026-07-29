@@ -16,6 +16,7 @@ kann es also ohne Weiteres wieder laufen.
 Beim Domainwechsel genügt es, BASE anzupassen und das Skript erneut zu starten.
 """
 
+import json
 import re
 import shutil
 import sys
@@ -921,6 +922,21 @@ def transform(src: str, lang: str, page: str) -> str:
         '    h1 { white-space: normal !important; }\\n'
         '    #orca-cookie-banner { padding: 16px 18px !important; }\\n'
         '  }\\n'
+        '  /* Mit dem Finger liess sich die Seite nicht scrollen, solange er auf\\n'
+        '     einem Bild lag: Die image-slot-Elemente des Exports fangen die\\n'
+        '     Beruehrung ab und unterdruecken die Standardgeste. Gemessen auf\\n'
+        '     der Seite Ueber uns: Wisch auf dem Bild 0 Pixel, daneben 382.\\n'
+        '     touch-action half nicht — die Angabe erlaubt eine Geste nur, sie\\n'
+        '     verhindert nicht, dass ein Listener sie abbestellt. Bleibt, die\\n'
+        '     Elemente fuer Zeigegeraete unsichtbar zu machen: Die Beruehrung\\n'
+        '     geht dann an den Bereich darunter, und die Seite scrollt wie\\n'
+        '     ueberall sonst. Klicks auf Projektkacheln funktionieren weiter,\\n'
+        '     weil der Klickbereich die Kachel ist und nicht das Bild.\\n'
+        '     Begrenzt auf Geraete ohne Mauszeiger, damit am Desktop das\\n'
+        '     Kontextmenue auf Bildern erhalten bleibt. */\\n'
+        '  @media (hover: none) and (pointer: coarse) {\\n'
+        '    image-slot { pointer-events: none !important; }\\n'
+        '  }\\n'
         '  /* Die aktive Sprache wird unterstrichen wie der aktive Menuepunkt.\\n'
         '     Vorher unterschied sie sich nur durch Transparenz, was bei dieser\\n'
         '     Schriftgroesse kaum zu erkennen ist. */\\n'
@@ -1102,7 +1118,37 @@ def transform(src: str, lang: str, page: str) -> str:
              f"<title>{title}</title>{head_links(lang, page)}",
              "Titel des aeusseren Dokuments")
 
+    pruefe_bundle(s, lang, page)
     return s
+
+
+def pruefe_bundle(s: str, lang: str, page: str) -> None:
+    """Stellt sicher, dass die Vorlage im Paket gültiges JSON geblieben ist.
+
+    Die Seite liegt in einem <script type="__bundler/template"> als
+    JSON-Zeichenkette und wird beim Laden mit JSON.parse gelesen. Jedes
+    einfache Anführungszeichen, das in eingefügtem Text steht, zerreisst sie —
+    im Browser erscheint dann nur "Error unpacking" und sonst nichts. Genau das
+    ist mit einem Wort in einem CSS-Kommentar passiert. Eingefügte
+    Anführungszeichen müssen als \\" geschrieben werden; diese Prüfung findet
+    den Fehler beim Bauen statt erst auf der fertigen Seite.
+    """
+    for art in ("template", "manifest"):
+        m = re.search(rf'<script type="__bundler/{art}"[^>]*>(.*?)</script>',
+                      s, re.S)
+        if m is None:
+            raise SystemExit(f"{page} [{lang}]: Block __bundler/{art} fehlt")
+        try:
+            json.loads(m.group(1))
+        except json.JSONDecodeError as fehler:
+            stelle = m.group(1)[max(0, fehler.pos - 90):fehler.pos + 40]
+            raise SystemExit(
+                f"{page} [{lang}]: __bundler/{art} ist kein gueltiges JSON "
+                f"mehr — {fehler.msg} an Position {fehler.pos}.\n"
+                f"  Umfeld: ...{stelle}...\n"
+                "  Meist ein Anfuehrungszeichen in eingefuegtem Text; "
+                "es muss dort als \\\" stehen."
+            ) from None
 
 
 def main() -> None:
