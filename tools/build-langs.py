@@ -5,9 +5,14 @@ Die deutschen Seiten im Repo-Wurzelverzeichnis sind die einzige Quelle. Dieses
 Skript legt en/ und fr/ neu an und passt zusätzlich die deutschen Seiten an
 (Sprachumschalter, hreflang, lang-Attribut).
 
-Aufruf aus dem Repo-Wurzelverzeichnis:
+Aufruf aus dem Repo-Wurzelverzeichnis, in dieser Reihenfolge:
 
     python3 tools/build-langs.py
+    NODE_PATH=$(npm root -g) node tools/prerender.js
+
+Der zweite Schritt rendert jede erzeugte Seite einmal vor und legt das Ergebnis
+als echtes HTML in die Datei. Ohne ihn sehen Crawler ohne JavaScript nur den
+Ladehinweis. Er ist nicht optional, wenn die Seiten gefunden werden sollen.
 
 Das Skript erwartet unveränderte Exporte: Es bricht ab, wenn eine Seite schon
 umgebaut wurde, statt doppelt zu patchen. Nach einem Neu-Export aus dem Editor
@@ -515,21 +520,25 @@ def transform(src: str, lang: str, page: str) -> str:
     # --- Hero: Standbild durch Video ersetzen ------------------------------
     # hero.mp4 ist die gedrehte Fassung des Hochformat-Clips (die Aufnahme lag
     # um 90 Grad gekippt in der Datei). Poster sorgt dafür, dass sofort ein
-    # Bild steht, während die 5 MB laden.
+    # Bild steht, während das Video lädt.
+    #
+    # Ohne Quelle im Markup: Welche Fassung geladen wird, entscheidet das
+    # Skript im Ladeteil (orcaHero) anhand der Fensterbreite. Der naheliegende
+    # Weg über zwei <source>-Elemente mit media-Angabe ist unbrauchbar —
+    # Chromium lädt auf dem Handy dann BEIDE Dateien, also 5865 statt 1141 KB.
+    # Nachgemessen mit Bereichsanfragen, wie GitHub Pages sie beantwortet.
     if page == "index.html":
         old_slot = ('<image-slot id=\\"hero-main\\" shape=\\"rect\\" '
                     'placeholder=\\"Porsche Rennwagen – Titelbild (später Video)\\" '
                     'style=\\"position:absolute; inset:0; width:100%; height:100%;\\" '
                     'src=\\"e264a4e1-5ee2-422f-9bcf-5a715b5d17b3\\"><\\u002Fimage-slot>')
-        pre = "/"
         new_video = (
-            f'<video autoplay=\\"true\\" muted=\\"true\\" loop=\\"true\\" '
-            f'playsinline=\\"true\\" preload=\\"auto\\" '
-            f'poster=\\"{pre}hero-poster.jpg\\" '
-            f'style=\\"position:absolute; inset:0; width:100%; height:100%; '
-            f'object-fit:cover; display:block;\\">'
-            f'<source src=\\"{pre}hero.mp4\\" type=\\"video/mp4\\">'
-            f'<\\u002Fvideo>')
+            '<video autoplay=\\"true\\" muted=\\"true\\" loop=\\"true\\" '
+            'playsinline=\\"true\\" preload=\\"auto\\" '
+            'poster=\\"/hero-poster.jpg\\" '
+            'style=\\"position:absolute; inset:0; width:100%; height:100%; '
+            'object-fit:cover; display:block;\\">'
+            '<\\u002Fvideo>')
         sub_once(old_slot, new_video, "Hero-Bildplatz")
 
         # Der Verlauf über dem Hero war für ein ruhiges Standbild ausgelegt.
@@ -692,9 +701,23 @@ def transform(src: str, lang: str, page: str) -> str:
         'for(var i=0;i<a.length;i++){'
         'var h=a[i].getAttribute("href")||"";'
         'if(h.indexOf("Legal.html")>=0)a[i].setAttribute("href",ziel);}};'
-        'orcaLegal();'
+        # Das Hero-Video kommt in zwei Fassungen: 1920x1078 mit 4724 KB und ein
+        # Hochformat-Zuschnitt mit 1141 KB. Auf dem Handy ist von einem
+        # 16:9-Bild ohnehin nur ein schmaler Streifen der Mitte zu sehen — der
+        # Zuschnitt zeigt genau diesen, in voller Bildhoehe. Im Bildvergleich
+        # sind beide bei 390 Pixel Breite nicht zu unterscheiden (41 dB).
+        # Die Auswahl faellt hier und nicht ueber zwei <source>-Elemente mit
+        # media-Angabe: Chromium laedt dabei beide Dateien.
+        'var orcaHero=function(){'
+        'var v=document.querySelector(".orca-hero video");'
+        'if(!v||v.getAttribute("src"))return;'
+        'var klein=window.matchMedia&&window.matchMedia("(max-width: 820px)").matches;'
+        'v.setAttribute("src",klein?"/hero-mobile.mp4":"/hero.mp4");'
+        'var w=v.play();if(w&&w.catch)w.catch(function(){});};'
+        'var orcaNach=function(){orcaLegal();orcaHero();};'
+        'orcaNach();'
         'if(window.MutationObserver){'
-        'new MutationObserver(orcaLegal).observe(document.documentElement,'
+        'new MutationObserver(orcaNach).observe(document.documentElement,'
         '{childList:true,subtree:true});}')
     sub_once(old_boot, new_boot, "Kontaktformular verdrahten")
 

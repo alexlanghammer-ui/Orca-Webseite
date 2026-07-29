@@ -44,8 +44,421 @@
       This page requires JavaScript to display.
     </div>
   </noscript>
+<style>
+    .sc-placeholder{background:color-mix(in srgb,currentColor 8%,transparent);
+      border:1px solid color-mix(in srgb,currentColor 50%,transparent);
+      border-radius:2px;box-sizing:border-box;overflow:hidden}
+    @keyframes sc-shine{0%{background-position:100% 50%}100%{background-position:0% 50%}}
+    html.sc-dc-streaming .sc-placeholder,
+    html.sc-dc-streaming .sc-interp.sc-missing{position:relative;
+      background:color-mix(in srgb,currentColor 5%,transparent);
+      border-color:transparent}
+    html.sc-dc-streaming .sc-placeholder::before,
+    html.sc-dc-streaming .sc-interp.sc-missing::before{content:'';
+      position:absolute;inset:0;pointer-events:none;
+      background:linear-gradient(90deg,rgba(217,119,87,0) 25%,rgba(247,225,211,.95) 37%,rgba(217,119,87,0) 63%);
+      background-size:400% 100%;animation:sc-shine 1.4s ease infinite}
+    html.sc-dc-streaming .sc-placeholder:nth-child(n+9 of .sc-placeholder)::before,
+    html.sc-dc-streaming .sc-interp.sc-missing:nth-child(n+9 of .sc-interp.sc-missing)::before{animation:none;
+      background:color-mix(in srgb,currentColor 8%,transparent)}
+    .sc-placeholder-error{padding:4px 8px;font:11px/1.4 ui-monospace,monospace;
+      color:color-mix(in srgb,currentColor 70%,transparent);word-break:break-word}
+    .sc-interp.sc-missing{display:inline-block;width:2em;height:1em;overflow:hidden;
+      vertical-align:text-bottom;background:rgba(255,255,255,.3);border:1px solid rgba(0,0,0,.5);
+      border-radius:2px;box-sizing:border-box;color:transparent;
+      user-select:none}
+    .sc-interp.sc-unresolved{font-family:ui-monospace,monospace;font-size:.85em;
+      color:color-mix(in srgb,currentColor 50%,transparent);
+      background:color-mix(in srgb,currentColor 10%,transparent);border-radius:3px;
+      padding:0 3px}
+    .sc-host.sc-has-error{position:relative}
+    .sc-logic-error{position:absolute;top:8px;left:8px;z-index:2147483647;max-width:60ch;
+      padding:6px 10px;background:#b00020;color:#fff;font:12px/1.4 ui-monospace,monospace;
+      border-radius:4px;white-space:pre-wrap;pointer-events:none}
+    /* Mirrors PRINT_BASELINE_CSS in apps/web deck-stage-export.ts — keep both
+       in sync until dc-runtime regains a build step. */
+    @media print {
+      @page { margin: 0.5cm; }
+      figure, table { break-inside: avoid; }
+      #dc-root, #dc-root > .sc-host { height: auto; }
+      *, *::before, *::after {
+        print-color-adjust: exact; -webkit-print-color-adjust: exact;
+        backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
+        animation-delay: -99s !important; animation-duration: .001s !important;
+        animation-iteration-count: 1 !important; animation-fill-mode: both !important;
+        animation-play-state: running !important; transition-duration: 0s !important;
+      }
+    }
+  
+html.__orca-boot{background:#2f3b2f !important}html.__orca-boot body{visibility:hidden !important}
+x-dc{display:none!important}
+
+html,body{height:100%;margin:0}#dc-root,#dc-root>.sc-host{height:100%}
+/* cyrillic-ext */
+
+/* cyrillic */
+
+/* vietnamese */
+
+/* latin-ext */
+
+/* latin */
+
+/* cyrillic-ext */
+
+/* cyrillic */
+
+/* vietnamese */
+
+/* latin-ext */
+
+/* latin */
+
+/* cyrillic-ext */
+
+/* cyrillic */
+
+/* vietnamese */
+
+/* latin-ext */
+
+/* latin */
+
+/* cyrillic-ext */
+
+/* cyrillic */
+
+/* vietnamese */
+
+/* latin-ext */
+
+/* latin */
+
+/* cyrillic-ext */
+
+/* cyrillic */
+
+/* vietnamese */
+
+/* latin-ext */
+
+/* latin */
+
+/* cyrillic-ext */
+
+/* cyrillic */
+
+/* greek */
+
+/* vietnamese */
+
+/* latin-ext */
+
+/* latin */
+
+/* cyrillic-ext */
+
+/* cyrillic */
+
+/* greek */
+
+/* vietnamese */
+
+/* latin-ext */
+
+/* latin */
+
+/* cyrillic-ext */
+
+/* cyrillic */
+
+/* greek */
+
+/* vietnamese */
+
+/* latin-ext */
+
+/* latin */
+
+
+
+  body { margin: 0; background: #f6f3ee; }
+  .nav-link, .logo-link, .lang-switch, .link-fade { transition: color 0.2s ease, border-color 0.2s ease; }
+  a { text-decoration: none; }
+  .field { width: 100%; box-sizing: border-box; padding: 12px 0; border: none; border-bottom: 1px solid #ddd7cc; background: transparent; font-family: 'Manrope', sans-serif; font-size: 15px; color: #1b1a17; outline: none; }
+  .field::placeholder { color: #6b6560; }
+
+  /* ORCA responsive */
+  @media (max-width: 820px) {
+    /* Kopfzeile bleibt einzeilig: Logo links, Sprachen und
+       Menue-Schaltflaeche rechts. Der Umbruch von vorher entfaellt,
+       weil die Menuepunkte in die Klappflaeche gewandert sind. */
+    header { padding: 14px 22px !important; flex-wrap: nowrap !important;
+             gap: 14px !important; }
+    /* Bezugspunkt fuer die Klappflaeche. Bewusst ohne !important: Die
+       Kopfzeile der Startseite traegt inline position:absolute und
+       liegt dadurch weiter ueber dem Video — mit !important wuerde
+       sie in den Textfluss zurueckfallen und den Hero nach unten
+       schieben. Ein Bezugspunkt ist sie als absolute ohnehin. */
+    header { position: relative; }
+    /* Der Firmenname darf schrumpfen und umbrechen, damit rechts
+       genug Platz bleibt; inline stand dort nowrap und
+       flex-shrink:0. */
+    header > a.logo-link { font-size: 14px !important;
+                          white-space: normal !important;
+                          line-height: 1.25 !important;
+                          flex-shrink: 1 !important;
+                          min-width: 0 !important; }
+    nav { gap: 8px !important; flex-wrap: nowrap !important;
+          flex-shrink: 0 !important; }
+    .orca-navlinks { display: none !important; }
+    .orca-burger { display: flex !important; }
+    /* Ohne die Menuepunkte daneben trennt der Strich nichts mehr. */
+    .orca-langs { gap: 2px !important; border-left: 0 !important;
+                  padding-left: 0 !important; }
+    /* Aufgeklappt: volle Breite unter der Kopfzeile. */
+    nav.orca-open .orca-navlinks { display: flex !important;
+                                   flex-direction: column !important;
+                                   align-items: stretch !important;
+                                   gap: 0 !important;
+                                   position: absolute;
+                                   top: 100%; left: 0; right: 0;
+                                   z-index: 30;
+                                   background: #f6f3ee;
+                                   border-top: 1px solid #ddd7cc;
+                                   border-bottom: 1px solid #ddd7cc;
+                                   padding: 6px 22px 12px;
+                                   box-sizing: border-box; }
+    nav.orca-open .orca-navlinks a.nav-link {
+        min-height: 50px !important; font-size: 12px !important;
+        border-bottom: 0 !important; padding: 0 0 0 14px !important;
+        color: #1b1a17 !important; }
+    /* Die aktuelle Seite ist im Export durch border-bottom im
+       style-Attribut markiert. Untereinander wirkt eine Unterkante
+       wie eine Trennlinie, deshalb wandert die Markierung an die
+       linke Seite. Der Selektor greift auf den Namen der
+       Eigenschaft zu, den die rendernde Schicht unveraendert
+       uebernimmt — anders als den Wert, in den sie Leerzeichen
+       einfuegt. */
+    nav.orca-open .orca-navlinks a.nav-link[style*="border-bottom"] {
+        border-left: 2px solid currentColor !important;
+        padding-left: 12px !important; }
+    section { padding-left: 22px !important; padding-right: 22px !important; }
+    footer { padding-left: 22px !important; padding-right: 22px !important; gap: 14px 26px !important; }
+    /* Alle mehrspaltigen Raster untereinander. Bewusst als Flex-Spalte
+       und nicht als einspaltiges Raster: Die Zeilenhoehe wurde dort
+       allein aus dem Bild abgeleitet, Name und Rolle darunter zaehlten
+       nicht mit und ragten 70px in die naechste Zeile — die Rolle des
+       ersten Geschaeftsfuehrers verschwand hinter dem zweiten Bild.
+       Zugleich wurde aspect-ratio gegen die alte, breitere Spalte
+       aufgeloest, wodurch die Bilder 265 statt 195px hoch waren. Als
+       Flex-Spalte stimmen beide Werte, und gap bleibt erhalten — bei
+       display:block waeren die Abstaende verloren gegangen. */
+    [style*="grid-template-columns"] { display: flex !important; flex-direction: column !important; }
+    /* Inhalte in einspaltigen Rastern mittig und nie breiter als die Zelle. */
+    image-slot, video, img { max-width: 100% !important; }
+    /* Hero: Text und Schaltflaeche an den Seitenrand. */
+    .orca-hero-text { left: 22px !important; right: 22px !important; }
+    /* Hero ueber den ganzen Bildschirm. Zwei Angaben zur Hoehe mit
+       Absicht: dvh meint die tatsaechlich sichtbare Hoehe, vh auf dem
+       iPhone dagegen das Fenster OHNE Adressleiste und ist damit
+       groesser als der sichtbare Bereich. Wer dvh nicht kennt, behaelt
+       den vh-Wert. Ein 16:9-Video wird im Hochformat bei
+       object-fit:cover stark seitlich beschnitten — das ist der Preis
+       fuer das bildschirmfuellende Bild und so gewollt. */
+    /* Kein Seitenabstand am Hero: Er ist randlos, und weil er
+       width:100% ohne border-box traegt, kaemen die 22px oben drauf —
+       die Seite liess sich dadurch 44px seitlich verschieben. */
+    .orca-hero { height: 100vh !important; height: 100dvh !important;
+                 min-height: 420px !important;
+                 padding-left: 0 !important; padding-right: 0 !important; }
+    /* Innenabstand des Kennzahlen-Rasters zuruecknehmen, sonst bleiben
+       von 346px nur 234px fuer den Inhalt. */
+    .orca-stats { padding-left: 0 !important; padding-right: 0 !important; }
+    /* Detailansicht der Projekte. Einspaltig stehen Bild und Text
+       untereinander und werden zusammen hoeher als der Dialog. Der
+       hatte overflow:hidden, die Textspalte zugleich eine eigene
+       Scrollflaeche mit max-height:86vh — der Text war dadurch
+       abgeschnitten und nicht erreichbar. Jetzt scrollt der Dialog
+       als Ganzes, und die Textspalte gibt ihre Scrollflaeche ab. */
+    /* Gescrollt wird die Flaeche hinter dem Dialog, nicht der Dialog
+       selbst. Damit entfaellt jede Hoehenangabe in vh — und genau
+       daran scheiterte der erste Versuch: Auf dem iPhone meint 100vh
+       das Fenster ohne Adressleiste, ist also groesser als das
+       tatsaechlich Sichtbare. Der Dialog passte rechnerisch in seine
+       Begrenzung, hatte deshalb nichts zu scrollen, ragte aber unter
+       die Browserleiste. Die Hintergrundflaeche ist position:fixed und
+       damit immer genau so hoch wie der sichtbare Bereich. */
+    .orca-modal-overlay { padding: 14px !important; align-items: flex-start !important;
+                          overflow-y: auto !important;
+                          -webkit-overflow-scrolling: touch !important; }
+    .orca-modal { max-height: none !important; overflow: visible !important; }
+    .orca-modal-media { min-height: 210px !important; }
+    .orca-modal-text { padding: 26px 22px 34px !important;
+                       overflow-y: visible !important; max-height: none !important; }
+    /* Schliessen bleibt sichtbar, statt beim Scrollen wegzuwandern. */
+    .orca-modal-close { position: fixed !important; top: 22px !important;
+                        right: 22px !important; z-index: 2 !important; }
+    /* Antippflaechen. Die Sprachumschalter waren 15x14 Pixel gross —
+       empfohlen sind mindestens 44x44 Punkte, darunter trifft man sie
+       mit dem Finger nicht verlaesslich. 40x40 plus Abstand kommt dem
+       nahe und laesst neben dem Firmennamen noch Platz; die Schrift
+       waechst von 10 auf 14 Pixel. */
+    nav a.lang-switch { min-width: 40px !important; min-height: 40px !important;
+                        display: inline-flex !important;
+                        align-items: center !important;
+                        justify-content: center !important;
+                        font-size: 14px !important; }
+    nav a.nav-link { display: inline-flex !important;
+                     align-items: center !important; }
+    /* Die Schraegstriche zwischen den Sprachen entfallen: Mit 40px
+       breiten Feldern sind die Kuerzel ohnehin klar getrennt, und die
+       Striche wirkten zwischen den groesseren Flaechen verloren. */
+    nav a.lang-switch + span { display: none !important; }
+    /* Die Markierung der aktuellen Sprache sitzt am Text und nicht am
+       unteren Rand der 40 Pixel hohen Antippflaeche — dort stand sie
+       13 Pixel unter der Schrift und wirkte losgeloest. */
+    a.lang-switch.is-active { border-bottom: 0 !important;
+                              padding-bottom: 0 !important;
+                              text-decoration: underline !important;
+                              text-underline-offset: 5px !important; }
+    h1 { white-space: normal !important; }
+    #orca-cookie-banner { padding: 16px 18px !important; }
+  }
+  /* Mit dem Finger liess sich die Seite nicht scrollen, solange er auf
+     einem Bild lag: Die image-slot-Elemente des Exports fangen die
+     Beruehrung ab und unterdruecken die Standardgeste. Gemessen auf
+     der Seite Ueber uns: Wisch auf dem Bild 0 Pixel, daneben 382.
+     touch-action half nicht — die Angabe erlaubt eine Geste nur, sie
+     verhindert nicht, dass ein Listener sie abbestellt. Bleibt, die
+     Elemente fuer Zeigegeraete unsichtbar zu machen: Die Beruehrung
+     geht dann an den Bereich darunter, und die Seite scrollt wie
+     ueberall sonst. Klicks auf Projektkacheln funktionieren weiter,
+     weil der Klickbereich die Kachel ist und nicht das Bild.
+     Begrenzt auf Geraete ohne Mauszeiger, damit am Desktop das
+     Kontextmenue auf Bildern erhalten bleibt. */
+  @media (hover: none) and (pointer: coarse) {
+    image-slot { pointer-events: none !important; }
+  }
+  /* Die aktive Sprache wird unterstrichen wie der aktive Menuepunkt.
+     Vorher unterschied sie sich nur durch Transparenz, was bei dieser
+     Schriftgroesse kaum zu erkennen ist. */
+  a.lang-switch.is-active { border-bottom: 1px solid currentColor;
+                            padding-bottom: 2px; }
+  /* Reserve fuer die Kopfzeile im mittleren Bereich. Die franzoesische
+     Navigation ist mit 440px die breiteste (deutsch 431, englisch 411),
+     bei 821px Fensterbreite blieben ihr nur 15px Reserve. Das genuegt,
+     damit sie umbricht, solange die Schrift noch laedt und die
+     Ersatzschrift breiter ausfaellt. Mit kleinerem Abstand sind es
+     rund 40px, und alle drei Sprachen verhalten sich gleich. */
+  @media (min-width: 821px) and (max-width: 1080px) {
+    header { padding-left: 32px !important; padding-right: 32px !important; }
+    nav { gap: 16px !important; }
+  }
+  /* Geschaeftsfuehrung: Die Rasterzeile wurde allein aus dem Bild
+     abgeleitet, Name und Rolle darunter zaehlten nicht mit und ragten
+     70px heraus — auf dem Handy hinter das naechste Bild, auf dem
+     Desktop in den Abstand darunter. Mit align-items:start wird die
+     Zelle nicht mehr auf die falsch berechnete Zeilenhoehe gedehnt,
+     sondern richtet sich nach ihrem Inhalt; das Bild loest dadurch
+     auch sein Seitenverhaeltnis korrekt auf (217 statt 287px).
+     Bewusst nur hier und nicht fuer alle Raster: andere richten ihren
+     Inhalt absichtlich mittig aus. */
+  .orca-leads { align-items: start; }
+  @media (max-width: 820px) {
+    /* Als Flex-Spalte muessen die Zellen wieder volle Breite haben. */
+    .orca-leads { align-items: stretch !important; }
+  }
+</style>
+<noscript><style>
+  body { display: block !important; background: #f6f3ee !important;
+         min-height: 0 !important; }
+  #__bundler_thumbnail, #__bundler_loading { display: none !important; }
+</style></noscript>
 </head>
 <body>
+<!-- orca-prerender -->
+<div id="orca-prerender">
+
+<div id="dc-root"><div class="sc-host" data-sc-name="Root"><title data-dc-tpl="0">Kontakt – ORCA Restoration GmbH, Eberdingen</title><meta data-dc-tpl="1" name="description" content="Sprechen Sie mit uns über Ihr Restaurationsprojekt. Robert-Bosch-Str. 4, 71735 Eberdingen. Telefon 07042 374 32 67, info@orca.gmbh."><meta data-dc-tpl="2" property="og:title" content="Kontakt – ORCA Restoration GmbH, Eberdingen"><meta data-dc-tpl="3" property="og:description" content="Sprechen Sie mit uns über Ihr Restaurationsprojekt. Robert-Bosch-Str. 4, 71735 Eberdingen. Telefon 07042 374 32 67, info@orca.gmbh."><meta data-dc-tpl="4" property="og:type" content="website"><meta data-dc-tpl="5" property="og:locale" content="de_DE"><meta data-dc-tpl="6" name="robots" content="index,follow"><link data-dc-tpl="8" rel="preconnect" href="https://fonts.googleapis.com"><div data-dc-tpl="12" style="background: rgb(246, 243, 238); color: rgb(27, 26, 23); font-family: Manrope, sans-serif; min-height: 100vh;">
+
+  <header data-dc-tpl="13" style="display: flex; align-items: center; justify-content: space-between; padding: 26px 56px; border-bottom: 1px solid rgb(221, 215, 204); gap: 32px;">
+    <a data-dc-tpl="14" href="/" class="logo-link scp0" style="font-family: &quot;Cormorant Garamond&quot;, serif; font-size: 18px; letter-spacing: 0.08em; color: rgb(27, 26, 23); font-weight: 500; flex-shrink: 0; white-space: nowrap;">ORCA Restoration GmbH</a>
+    <nav data-dc-tpl="15" style="display: flex; align-items: center; gap: 24px; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; flex-wrap: nowrap; white-space: nowrap; flex-shrink: 0;">
+      <div data-dc-tpl="16" class="orca-navlinks" style="display: flex; align-items: center; gap: 24px;">
+      <a data-dc-tpl="17" href="/" class="nav-link scp0" style="color: rgb(27, 26, 23); flex-shrink: 0;"><span class="sc-interp">Start</span></a>
+      <a data-dc-tpl="18" href="/about/" class="nav-link scp0" style="color: rgb(27, 26, 23); flex-shrink: 0;"><span class="sc-interp">Über uns</span></a>
+      <a data-dc-tpl="19" href="/projects/" class="nav-link scp0" style="color: rgb(27, 26, 23); flex-shrink: 0;"><span class="sc-interp">Projekte</span></a>
+      <a data-dc-tpl="20" href="/contact/" class="nav-link scp0" style="color: rgb(27, 26, 23); border-bottom: 1px solid rgb(122, 35, 49); padding-bottom: 4px; flex-shrink: 0;"><span class="sc-interp">Kontakt</span></a>
+      </div>
+      <div data-dc-tpl="21" class="orca-langs" style="display: flex; align-items: center; gap: 8px; border-left: 1px solid rgb(221, 215, 204); padding-left: 20px; flex-shrink: 0;">
+        <a data-dc-tpl="22" href="/contact/" class="lang-switch is-active" style="color: rgb(122, 35, 49);">DE</a>
+        <span data-dc-tpl="23" style="color: rgb(221, 215, 204);">/</span>
+        <a data-dc-tpl="24" href="/en/contact/" class="lang-switch" style="color: rgb(107, 101, 96);">EN</a>
+        <span data-dc-tpl="25" style="color: rgb(221, 215, 204);">/</span>
+        <a data-dc-tpl="26" href="/fr/contact/" class="lang-switch" style="color: rgb(107, 101, 96);">FR</a>
+      </div>
+      <button data-dc-tpl="27" type="button" class="orca-burger" aria-label="Menü" aria-expanded="false" style="display: none; flex-direction: column; justify-content: center; align-items: center; gap: 5px; width: 40px; height: 40px; padding: 0px; margin: 0px; border: 0px; background: none; color: rgb(27, 26, 23); cursor: pointer; flex-shrink: 0;"><span data-dc-tpl="28" style="display: block; width: 22px; height: 2px; background: currentcolor;"></span><span data-dc-tpl="29" style="display: block; width: 22px; height: 2px; background: currentcolor;"></span><span data-dc-tpl="30" style="display: block; width: 22px; height: 2px; background: currentcolor;"></span></button>
+    </nav>
+  </header>
+
+  <section data-dc-tpl="31" style="padding: 100px 56px 60px; max-width: 900px; margin: 0px auto; text-align: center;">
+    <span data-dc-tpl="32" style="font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: rgb(122, 35, 49);"><span class="sc-interp">Kontakt</span></span>
+    <h1 data-dc-tpl="33" style="font-family: &quot;Cormorant Garamond&quot;, serif; font-weight: 400; font-size: 46px; margin: 14px 0px 0px;"><span class="sc-interp">Lassen Sie uns über Ihr Projekt sprechen</span></h1>
+  </section>
+
+  <section data-dc-tpl="34" style="max-width: 1100px; margin: 0px auto; padding: 0px 56px 120px; display: grid; grid-template-columns: minmax(0px, 1fr) minmax(0px, 1fr); gap: 80px;">
+    <div data-dc-tpl="35" style="display: flex; flex-direction: column; gap: 22px;">
+      <input data-dc-tpl="36" class="field orca-f-name" type="text" placeholder="Name">
+      <input data-dc-tpl="37" class="field orca-f-email" type="email" placeholder="E-Mail">
+      <input data-dc-tpl="38" class="field orca-f-vehicle" type="text" placeholder="Fahrzeug">
+      <textarea data-dc-tpl="39" class="field orca-f-message" rows="4" placeholder="Nachricht" style="resize: vertical;"></textarea>
+      <input data-dc-tpl="40" class="orca-f-hp" type="text" tabindex="-1" autocomplete="off" aria-hidden="true" style="position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0;">
+      <button data-dc-tpl="41" type="button" class="orca-send" style="margin-top: 10px; align-self: flex-start; padding: 14px 34px; border: 1px solid rgb(27, 26, 23); background: transparent; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: rgb(27, 26, 23); cursor: pointer; font-family: Manrope, sans-serif;"><span class="sc-interp">Senden</span></button>
+      <div data-dc-tpl="42" class="orca-status" role="status" style="font-size: 14px; line-height: 1.6; min-height: 22px; color: rgb(107, 101, 96);"></div>
+    </div>
+
+    <div data-dc-tpl="43" style="display: flex; flex-direction: column; gap: 28px;">
+      <div data-dc-tpl="44">
+        <div data-dc-tpl="45" style="font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: rgb(122, 35, 49); margin-bottom: 8px;"><span class="sc-interp">Adresse</span></div>
+        <div data-dc-tpl="46" style="font-size: 15px; line-height: 1.7; color: rgb(107, 101, 96);">ORCA Restoration GmbH<br data-dc-tpl="47">Robert-Bosch-Str. 4<br data-dc-tpl="48">71735 Eberdingen</div>
+      </div>
+      <div data-dc-tpl="49">
+        <div data-dc-tpl="50" style="font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: rgb(122, 35, 49); margin-bottom: 8px;"><span class="sc-interp">Telefon</span></div>
+        <a data-dc-tpl="51" href="tel:070423743267" class="scp0" style="font-size: 15px; color: rgb(27, 26, 23);">07042 374 32 67</a>
+      </div>
+      <div data-dc-tpl="52">
+        <div data-dc-tpl="53" style="font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: rgb(122, 35, 49); margin-bottom: 8px;"><span class="sc-interp">E-Mail</span></div>
+        <a data-dc-tpl="54" href="mailto:info@orca.gmbh" class="scp0" style="font-size: 15px; color: rgb(27, 26, 23);">info@orca.gmbh</a>
+      </div>
+      <div data-dc-tpl="55">
+        <div data-dc-tpl="56" style="font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: rgb(122, 35, 49); margin-bottom: 8px;"><span class="sc-interp">Öffnungszeiten</span></div>
+        <div data-dc-tpl="57" style="font-size: 15px; line-height: 1.7; color: rgb(107, 101, 96);"><span class="sc-interp">Besuche nach Vereinbarung</span></div>
+      </div>
+      <div data-dc-tpl="58">
+        <div data-dc-tpl="59" style="font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: rgb(122, 35, 49); margin-bottom: 8px;">Instagram</div>
+        <a data-dc-tpl="60" href="https://www.instagram.com/orca.restoration/" target="_blank" rel="noopener noreferrer" class="scp0" style="font-size: 15px; color: rgb(27, 26, 23);"><svg data-dc-tpl="61" viewBox="0 0 24 24" width="14" height="14" style="vertical-align: -2px; margin-right: 6px; fill: none; stroke: currentcolor; stroke-width: 1.9;"><rect data-dc-tpl="62" x="3" y="3" width="18" height="18" rx="5"></rect><circle data-dc-tpl="63" cx="12" cy="12" r="4"></circle><circle data-dc-tpl="64" cx="17.2" cy="6.8" r="1.15" style="fill: currentcolor; stroke: none;"></circle></svg>@orca.restoration</a>
+      </div>
+    </div>
+  </section>
+
+  <section data-dc-tpl="65" style="border-top: 1px solid rgb(221, 215, 204);">
+    <div data-dc-tpl="66" data-cookie-map="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2622.857901638274!2d8.936827976350775!3d48.899045197844856!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47977d3aac5a64c5%3A0xc3e8d3362327b112!2sORCA%20Restoration%20GmbH!5e0!3m2!1sde!2sde!4v1702660735657!5m2!1sde!2sde" style="width: 100%; height: 420px;"><div data-dc-tpl="67" style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; text-align: center; padding: 24px; box-sizing: border-box; background: rgb(231, 225, 213); color: rgb(107, 101, 96);"><div data-dc-tpl="68" style="font-size: 14px; line-height: 1.6; max-width: 360px;">Zum Anzeigen der Karte ist Ihre Zustimmung erforderlich. Dabei werden Daten an Google übertragen.</div><button data-dc-tpl="69" type="button" data-load-map="" style="padding: 12px 26px; border: 1px solid rgb(27, 26, 23); background: transparent; font: 600 11px / 1 Manrope, sans-serif; letter-spacing: 0.14em; text-transform: uppercase; color: rgb(27, 26, 23); cursor: pointer;">Karte laden</button></div></div>
+  </section>
+
+  <footer data-dc-tpl="70" style="padding: 56px 56px 40px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 20px 48px; font-size: 13px; color: rgb(107, 101, 96);">
+    <div data-dc-tpl="71" style="font-family: &quot;Cormorant Garamond&quot;, serif; font-size: 18px; letter-spacing: 0.08em; color: rgb(27, 26, 23);">ORCA Restoration GmbH</div>
+    <div data-dc-tpl="72">Robert-Bosch-Str. 4, 71735 Eberdingen</div>
+    <div data-dc-tpl="73"><a data-dc-tpl="74" href="tel:070423743267" class="link-fade scp1" style="color: rgb(122, 35, 49);">07042 374 32 67</a> · <a data-dc-tpl="75" href="mailto:info@orca.gmbh" class="link-fade scp1" style="color: rgb(122, 35, 49);">info@orca.gmbh</a> · <a data-dc-tpl="76" href="https://www.instagram.com/orca.restoration/" target="_blank" rel="noopener noreferrer" class="link-fade scp1" style="color: rgb(122, 35, 49);"><svg data-dc-tpl="77" viewBox="0 0 24 24" width="14" height="14" style="vertical-align: -2px; margin-right: 6px; fill: none; stroke: currentcolor; stroke-width: 1.9;"><rect data-dc-tpl="78" x="3" y="3" width="18" height="18" rx="5"></rect><circle data-dc-tpl="79" cx="12" cy="12" r="4"></circle><circle data-dc-tpl="80" cx="17.2" cy="6.8" r="1.15" style="fill: currentcolor; stroke: none;"></circle></svg>Instagram</a></div>
+    <div data-dc-tpl="81"><a data-dc-tpl="82" href="/legal/" class="link-fade scp0" style="color: rgb(107, 101, 96);">Impressum</a> · © 2026 ORCA Restoration GmbH</div>
+  </footer></div></div></div>
+
+
+
+
+<div id="orca-cookie-banner" style="position:fixed;left:0;right:0;bottom:0;z-index:9999;background:#1b1a17;color:#e9e4da;padding:20px 24px;display:flex;align-items:center;gap:22px;flex-wrap:wrap;justify-content:center;font-family:Manrope,sans-serif;box-shadow:0 -8px 30px rgba(0,0,0,0.25);"><div style="font-size:13px;line-height:1.6;max-width:640px;flex:1 1 320px;">Wir verwenden nur technisch notwendige Cookies. Externe Inhalte wie die Google-Karte werden erst nach Ihrer Zustimmung geladen und können dabei Cookies setzen. <a href="/legal/" style="color:#c9b89a;text-decoration:underline;">Impressum &amp; Datenschutz</a></div><div style="display:flex;gap:12px;flex-shrink:0;"><button type="button" data-decline="" style="padding:12px 24px;border:1px solid rgba(233,228,218,0.5);background:transparent;color:#e9e4da;font:600 11px/1 Manrope,sans-serif;letter-spacing:0.14em;text-transform:uppercase;cursor:pointer;">Ablehnen</button><button type="button" data-accept="" style="padding:12px 24px;border:1px solid #c9b89a;background:#c9b89a;color:#1b1a17;font:600 11px/1 Manrope,sans-serif;letter-spacing:0.14em;text-transform:uppercase;cursor:pointer;">Akzeptieren</button></div></div>
+</div>
+<!-- orca-prerender -->
   <div id="__bundler_thumbnail">
   <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
     <rect width="1200" height="800" fill="#2f3b2f"></rect>
@@ -330,7 +743,7 @@ document.addEventListener('DOMContentLoaded', async function() {
       'html.__orca-boot body{visibility:hidden !important}</' + 'style>' +
       '<script>(function(){' +
       'var h=document.documentElement,done=false;' +
-      'h.classList.add("__orca-boot");document.addEventListener("click",function(ev){var b=ev.target&&ev.target.closest?ev.target.closest(".orca-send"):null;if(!b)return;ev.preventDefault();var g=function(c){var el=document.querySelector("."+c);return el&&el.value?el.value.trim():"";};var W={de:["Name","E-Mail","Fahrzeug","Nachricht","Bitte E-Mail und Nachricht angeben.","Wird gesendet \u2026","Vielen Dank, Ihre Nachricht ist unterwegs.","Senden nicht m\u00f6glich. Bitte schreiben Sie an info@orca.gmbh.","Anfrage \u00fcber die Website"],en:["Name","Email","Vehicle","Message","Please provide your email and a message.","Sending \u2026","Thank you, your message is on its way.","Sending failed. Please write to info@orca.gmbh.","Enquiry via the website"],fr:["Nom","E-mail","V\u00e9hicule","Message","Merci d\u2019indiquer votre e-mail et un message.","Envoi \u2026","Merci, votre message est en route.","\u00c9chec de l\u2019envoi. Merci d\u2019\u00e9crire \u00e0 info@orca.gmbh.","Demande via le site"]};var L=(document.documentElement.getAttribute("lang")||"de").substring(0,2);var t=W[L]||W.de;var st=document.querySelector(".orca-status");var sag=function(s,ok){if(!st)return;st.textContent=s;st.style.color=ok===false?"#7a2331":"";};var n=g("orca-f-name"),m=g("orca-f-email"),v=g("orca-f-vehicle"),x=g("orca-f-message");if(!m||!x){sag(t[4],false);var f=document.querySelector(m?".orca-f-message":".orca-f-email");if(f)f.focus();return;}var hp=document.querySelector(".orca-f-hp");if(hp&&hp.value){return;}var d={name:n,email:m,fahrzeug:v,nachricht:x,sprache:L,betreff:t[8]};b.disabled=true;sag(t[5],true);fetch("https://orca.gmbh/kontakt.php",{method:"POST",headers:{"Content-Type":"text/plain;charset=UTF-8"},body:JSON.stringify(d)}).then(function(r){return r.text().then(function(tx){return {ok:r.ok,st:r.status,tx:tx};});}).then(function(a){var j=null;try{j=JSON.parse(a.tx);}catch(e){}if(!a.ok||!j||!j.ok)throw new Error(j&&j.fehler?j.fehler:"HTTP "+a.st);sag(t[6],true);["orca-f-name","orca-f-email","orca-f-vehicle","orca-f-message"].forEach(function(c){var el=document.querySelector("."+c);if(el)el.value="";});b.disabled=false;}).catch(function(e){sag(t[7]+" ("+((e&&e.message)||"Verbindung")+")",false);b.disabled=false;});},true);document.addEventListener("click",function(ev){var nv=document.querySelector("nav");if(!nv)return;var t=ev.target;if(!t||!t.closest)return;var b=t.closest(".orca-burger");if(b){ev.preventDefault();var o=nv.classList.toggle("orca-open");b.setAttribute("aria-expanded",o?"true":"false");return;}if(nv.classList.contains("orca-open")&&!t.closest("nav")){nv.classList.remove("orca-open");var s=nv.querySelector(".orca-burger");if(s)s.setAttribute("aria-expanded","false");}},true);document.addEventListener("keydown",function(ev){if(ev.key!=="Escape")return;var nv=document.querySelector("nav");if(!nv||!nv.classList.contains("orca-open"))return;nv.classList.remove("orca-open");var s=nv.querySelector(".orca-burger");if(s){s.setAttribute("aria-expanded","false");s.focus();}});var orcaLegal=function(){var L=(document.documentElement.getAttribute("lang")||"de").substring(0,2);var ziel=L==="de"?"/legal/":"/"+L+"/legal/";var a=document.getElementsByTagName("a");for(var i=0;i<a.length;i++){var h=a[i].getAttribute("href")||"";if(h.indexOf("Legal.html")>=0)a[i].setAttribute("href",ziel);}};orcaLegal();if(window.MutationObserver){new MutationObserver(orcaLegal).observe(document.documentElement,{childList:true,subtree:true});}' +
+      'h.classList.add("__orca-boot");document.addEventListener("click",function(ev){var b=ev.target&&ev.target.closest?ev.target.closest(".orca-send"):null;if(!b)return;ev.preventDefault();var g=function(c){var el=document.querySelector("."+c);return el&&el.value?el.value.trim():"";};var W={de:["Name","E-Mail","Fahrzeug","Nachricht","Bitte E-Mail und Nachricht angeben.","Wird gesendet \u2026","Vielen Dank, Ihre Nachricht ist unterwegs.","Senden nicht m\u00f6glich. Bitte schreiben Sie an info@orca.gmbh.","Anfrage \u00fcber die Website"],en:["Name","Email","Vehicle","Message","Please provide your email and a message.","Sending \u2026","Thank you, your message is on its way.","Sending failed. Please write to info@orca.gmbh.","Enquiry via the website"],fr:["Nom","E-mail","V\u00e9hicule","Message","Merci d\u2019indiquer votre e-mail et un message.","Envoi \u2026","Merci, votre message est en route.","\u00c9chec de l\u2019envoi. Merci d\u2019\u00e9crire \u00e0 info@orca.gmbh.","Demande via le site"]};var L=(document.documentElement.getAttribute("lang")||"de").substring(0,2);var t=W[L]||W.de;var st=document.querySelector(".orca-status");var sag=function(s,ok){if(!st)return;st.textContent=s;st.style.color=ok===false?"#7a2331":"";};var n=g("orca-f-name"),m=g("orca-f-email"),v=g("orca-f-vehicle"),x=g("orca-f-message");if(!m||!x){sag(t[4],false);var f=document.querySelector(m?".orca-f-message":".orca-f-email");if(f)f.focus();return;}var hp=document.querySelector(".orca-f-hp");if(hp&&hp.value){return;}var d={name:n,email:m,fahrzeug:v,nachricht:x,sprache:L,betreff:t[8]};b.disabled=true;sag(t[5],true);fetch("https://orca.gmbh/kontakt.php",{method:"POST",headers:{"Content-Type":"text/plain;charset=UTF-8"},body:JSON.stringify(d)}).then(function(r){return r.text().then(function(tx){return {ok:r.ok,st:r.status,tx:tx};});}).then(function(a){var j=null;try{j=JSON.parse(a.tx);}catch(e){}if(!a.ok||!j||!j.ok)throw new Error(j&&j.fehler?j.fehler:"HTTP "+a.st);sag(t[6],true);["orca-f-name","orca-f-email","orca-f-vehicle","orca-f-message"].forEach(function(c){var el=document.querySelector("."+c);if(el)el.value="";});b.disabled=false;}).catch(function(e){sag(t[7]+" ("+((e&&e.message)||"Verbindung")+")",false);b.disabled=false;});},true);document.addEventListener("click",function(ev){var nv=document.querySelector("nav");if(!nv)return;var t=ev.target;if(!t||!t.closest)return;var b=t.closest(".orca-burger");if(b){ev.preventDefault();var o=nv.classList.toggle("orca-open");b.setAttribute("aria-expanded",o?"true":"false");return;}if(nv.classList.contains("orca-open")&&!t.closest("nav")){nv.classList.remove("orca-open");var s=nv.querySelector(".orca-burger");if(s)s.setAttribute("aria-expanded","false");}},true);document.addEventListener("keydown",function(ev){if(ev.key!=="Escape")return;var nv=document.querySelector("nav");if(!nv||!nv.classList.contains("orca-open"))return;nv.classList.remove("orca-open");var s=nv.querySelector(".orca-burger");if(s){s.setAttribute("aria-expanded","false");s.focus();}});var orcaLegal=function(){var L=(document.documentElement.getAttribute("lang")||"de").substring(0,2);var ziel=L==="de"?"/legal/":"/"+L+"/legal/";var a=document.getElementsByTagName("a");for(var i=0;i<a.length;i++){var h=a[i].getAttribute("href")||"";if(h.indexOf("Legal.html")>=0)a[i].setAttribute("href",ziel);}};var orcaHero=function(){var v=document.querySelector(".orca-hero video");if(!v||v.getAttribute("src"))return;var klein=window.matchMedia&&window.matchMedia("(max-width: 820px)").matches;v.setAttribute("src",klein?"/hero-mobile.mp4":"/hero.mp4");var w=v.play();if(w&&w.catch)w.catch(function(){});};var orcaNach=function(){orcaLegal();orcaHero();};orcaNach();if(window.MutationObserver){new MutationObserver(orcaNach).observe(document.documentElement,{childList:true,subtree:true});}' +
       'function reveal(){if(done)return;done=true;h.classList.remove("__orca-boot");}' +
       'function ready(){var b=document.body;' +
       'return b&&b.firstElementChild&&b.textContent.indexOf("{{")===-1;}' +
