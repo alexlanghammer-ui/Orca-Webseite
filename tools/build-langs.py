@@ -321,6 +321,15 @@ def switch_href(from_lang: str, to_lang: str, page: str) -> str:
 GERMAN_ONLY = ("Legal.html",)
 
 
+# Beschriftung des Laufbands im Hero für Screenreader. Vorgelesen würde sonst
+# die Aneinanderreihung der Fahrzeugnamen, was als Ziel eines Verweises nichts
+# aussagt.
+TICKER_LABEL = {
+    "de": "Alle Projekte ansehen",
+    "en": "View all projects",
+    "fr": "Voir tous les projets",
+}
+
 OG_IMAGE_ALT = {
     "de": "Historischer Porsche-Rennwagen auf einer Passstrasse",
     "en": "Historic Porsche race car on a mountain pass road",
@@ -587,6 +596,26 @@ def transform(src: str, lang: str, page: str) -> str:
                     'rgba(10,9,7,0.05) 32%, rgba(10,9,7,0.42) 60%, '
                     'rgba(10,9,7,0.82) 100%)')
         sub_once(old_grad, new_grad, "Hero-Verlauf")
+
+        # --- Laufband im Hero anklickbar machen ---------------------------
+        # Es zeigt die Fahrzeuge und fuehrt deshalb zur Projektseite. Bewusst
+        # als echter Verweis und nicht ueber einen Klick-Handler: So laesst er
+        # sich mit der Tastatur erreichen, in einem neuen Tab oeffnen, und
+        # Suchmaschinen folgen ihm. Die Klasse bleibt am Element, damit die
+        # Regel zum Anhalten beim Ueberfahren weiter greift.
+        sub_once('<div class=\\"orca-ticker\\" style=\\"position:absolute; '
+                 'left:0; right:0; bottom:62px;',
+                 f'<a href=\\"{link_for(lang, "Projects.html")}\\" '
+                 f'aria-label=\\"{TICKER_LABEL[lang]}\\" '
+                 'class=\\"orca-ticker link-fade\\" '
+                 'style=\\"display:block; cursor:pointer; '
+                 'position:absolute; left:0; right:0; bottom:62px;',
+                 "Laufband als Verweis")
+        sub_once('<\\u002Fdiv>\\n    <\\u002Fdiv>\\n\\n    '
+                 '<div sc-camel-on-click=\\"{{ scrollDown }}\\"',
+                 '<\\u002Fdiv>\\n    <\\u002Fa>\\n\\n    '
+                 '<div sc-camel-on-click=\\"{{ scrollDown }}\\"',
+                 "Abschluss des Laufbands")
 
     # --- Datenschutzerklaerung ausbauen ------------------------------------
     # Die bisherige Fassung nannte nur allgemeine Grundsaetze und ein
