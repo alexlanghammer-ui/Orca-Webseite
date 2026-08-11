@@ -389,12 +389,17 @@ def head_links(lang: str, page: str) -> str:
         f'<meta name="twitter:image" content="{BASE}/og-image.jpg">',
     ]
 
-    # Symbol der Seite. Google zeigt es in den Ergebnissen auf dem Handy an,
-    # es ist also nicht nur Zierde. Das SVG skaliert, das PNG deckt ältere
-    # Browser ab, apple-touch-icon gilt beim Ablegen auf dem Startbildschirm.
+    # Symbol der Seite: ein schwarzes O im Serifenschnitt, passend zum
+    # Schriftzug. Google zeigt es in den Ergebnissen an, es ist also nicht nur
+    # Zierde. Zwei Groessen, weil Google mindestens 48 Pixel verlangt und
+    # hochaufloesende Anzeigen mehr brauchen; apple-touch-icon gilt beim
+    # Ablegen auf dem Startbildschirm. Eine SVG-Fassung gibt es bewusst nicht:
+    # Sie muesste den Buchstaben als Pfad enthalten, sonst saehe sie je nach
+    # Geraet anders aus als die PNG-Fassungen.
     out += [
-        '<link rel="icon" href="/favicon.svg" type="image/svg+xml">',
+        '<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">',
         '<link rel="icon" href="/favicon-48.png" sizes="48x48" type="image/png">',
+        '<link rel="icon" href="/favicon-192.png" sizes="192x192" type="image/png">',
         '<link rel="apple-touch-icon" href="/apple-touch-icon.png">',
         '<meta name="theme-color" content="#1b1a17">',
     ]
@@ -411,6 +416,7 @@ def head_links(lang: str, page: str) -> str:
         f'"url":"{url_for(lang, "index.html")}",'
         '"telephone":"+4970423743267","email":"info@orca.gmbh",'
         '"vatID":"DE815733570",'
+        f'"logo":"{BASE}/logo-orca.png",'
         f'"sameAs":["{INSTAGRAM_URL}"],'
         '"address":{"@type":"PostalAddress",'
         '"streetAddress":"Robert-Bosch-Str. 4","postalCode":"71735",'
@@ -1046,6 +1052,12 @@ def transform(src: str, lang: str, page: str) -> str:
         '    h1 { white-space: normal !important; }\\n'
         '    #orca-cookie-banner { padding: 16px 18px !important; }\\n'
         '  }\\n'
+        '  /* Beschreibung auf der Projektkachel: drei Zeilen, der Rest wird\\n'
+        '     abgeschnitten. Der vollstaendige Text steht im Dokument und ist\\n'
+        '     ueber die Detailansicht zu lesen. */\\n'
+        '  .proj-teaser { display: -webkit-box; -webkit-box-orient: vertical;\\n'
+        '                 -webkit-line-clamp: 3; line-clamp: 3;\\n'
+        '                 overflow: hidden; }\\n'
         '  /* Der Hinweistext ueber der Karte stand mit 4.41:1 auf dem helleren\\n'
         '     Kasten — verlangt sind 4.5:1 fuer kleine Schrift. Etwas dunkler\\n'
         '     ergibt 6.0:1. Der Text kommt aus dem komprimierten Paket und ist\\n'
@@ -1100,6 +1112,30 @@ def transform(src: str, lang: str, page: str) -> str:
         '    .orca-leads { align-items: stretch !important; }\\n'
         '  }')
     sub_once(old_media, new_media, "Responsive-Regeln")
+
+    # --- Projekttexte auf die Kachel holen --------------------------------
+    # Die Beschreibungen der acht Fahrzeuge — zusammen 520 Woerter und der
+    # inhaltlich wertvollste Text der ganzen Seite — standen nur in der
+    # Detailansicht und entstanden erst beim Anklicken. Google klickt nicht,
+    # also war dieser Text fuer Suchmaschinen nicht vorhanden.
+    #
+    # Er steht jetzt in der Kachel selbst. Sichtbar sind drei Zeilen, der Rest
+    # wird abgeschnitten (line-clamp) — der uebliche Aufbau einer Kachelliste.
+    # Damit ist der Text im Dokument, ohne dass die Seite zur Textwueste wird;
+    # vollstaendig zu lesen ist er wie bisher in der Detailansicht.
+    # Bewusst nicht versteckt (etwa ausserhalb des Bildschirms): Text, den nur
+    # Suchmaschinen sehen, gilt zu Recht als Manipulation.
+    if page == "Projects.html":
+        sub_once(
+            '        <\\u002Fdiv>\\n      <\\u002Fdiv>\\n    <\\u002Fsc-for>',
+            '        <\\u002Fdiv>\\n'
+            '        <div class=\\"proj-teaser\\" style=\\"font-size:14px; '
+            'line-height:1.7; color:{{ textMuted }}; margin-top:10px;\\">'
+            '<sc-for list=\\"{{ p.desc }}\\" as=\\"para\\">'
+            '<span>{{ para }} <\\u002Fspan><\\u002Fsc-for>'
+            '<\\u002Fdiv>\\n'
+            '      <\\u002Fdiv>\\n    <\\u002Fsc-for>',
+            "Beschreibung auf der Projektkachel")
 
     # Klassen an die vier Bausteine der Projekt-Detailansicht.
     if page == "Projects.html":
