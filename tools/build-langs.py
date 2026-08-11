@@ -321,6 +321,83 @@ def switch_href(from_lang: str, to_lang: str, page: str) -> str:
 GERMAN_ONLY = ("Legal.html",)
 
 
+# Beschreibungen der acht Fahrzeuge in Englisch und Franzoesisch. Der
+# Export enthaelt sie nur auf Deutsch; auf den Sprachseiten standen sie
+# deshalb deutsch da. Die Zuordnung laeuft ueber die Kennung des Projekts,
+# die Reihenfolge der Absaetze muss der deutschen entsprechen — das Skript
+# prueft das beim Bauen. In den Texten kommen bewusst keine geraden
+# Anfuehrungszeichen und keine geraden Apostrophe vor: Die Absaetze stehen
+# in einfach begrenzten JS-Zeichenketten innerhalb eines JSON-Blocks.
+PROJEKT_ABSAETZE = {
+    "en": {
+        "proj-910": [
+            "After more than a year of complete restoration, the Porsche 910 rolled out at the Birkhau training ground near Kirchheim/Teck. Standing just 980 mm tall, the car looks almost delicate — yet its slender fibreglass body carries an impressive presence.",
+            "Built between 1966 and 1968 as a further development of the 906, the 910 (“Carrera 10”) was reserved for the works team; only around 35 were made. Its air-cooled 2.0-litre flat-six (type 901) delivers some 220 hp at 8,000 rpm through a five-speed gearbox with limited-slip differential.",
+        ],
+        "proj-906": [
+            "The 906 opened the era of pure lightweight racing cars in 1966. Sixty-seven examples of the Carrera 6 were built, most of them for private customers. Chassis 126 went to the Swiss collector Dr Hans Kühnis and made its debut at the 1966 Targa Florio — the race Porsche won outright.",
+            "After more than five decades of racing and a serious accident at the Salzburgring in 2020, the ORCA team rebuilt the 906/126 in a full restoration, returning it precisely to its original 1966 condition.",
+        ],
+        "proj-550": [
+            "The Porsche 550 Spyder prototype (chassis 12, 1954) was returned to its original Le Mans livery — silver, race number 39, with turquoise markings along the rear side edges.",
+            "Missing original parts such as the race-number lighting were painstakingly recreated, partly by CAD scan and 3D printing. Today the car is a much-admired exhibit at the Le Mans museum — back where it first triumphed.",
+        ],
+        "proj-917-15": [
+            "The Porsche 917 (chassis 15, 1970) took overall victory at the Daytona 24 Hours with Pedro Rodríguez and Leo Kinnunen. In Gulf colours it became a legend through the film classic “Le Mans” with Steve McQueen.",
+            "After almost 50 years with various collectors, the car came to ORCA in 2020. The work took more than three years, until in January 2024 it was handed back to its owner in race-ready 1970 specification.",
+        ],
+        "proj-911r": [
+            "This 911 R belonged to racing legend Jo Siffert. At ORCA it underwent an elaborate restoration — the paintwork faithfully restored, deliberately keeping the typical traces of age.",
+            "A detailed report on the car and its restoration was the cover story of the first issue, 01/2023, of the Swiss magazine “Spirit”.",
+        ],
+        "proj-917-045": [
+            "The cosmetic restoration of the 917/045 took place between July and September 2020. The car raced at Le Mans in 1971 with Siffert and Bell, and later went, in Martini colours, to the ACO museum in Le Mans as a permanent loan.",
+            "For the special exhibition “Made for Le Mans” it was returned to its original 1971 livery — including faithfully recreated paint damage of the kind that occurs in racing.",
+        ],
+        "proj-917-spy": [
+            "The original car from the 1971 Interserie — the third Porsche 917 rebuilt at ORCA Restoration. Another chapter in the company’s 917 history.",
+        ],
+        "proj-910-berg": [
+            "An exceptionally rare car: one of only two surviving examples — the second is in the Porsche Museum. In 1967 it won the Mont Ventoux hill climb of the European Hill Climb Championship.",
+            "Extreme lightweight construction: just 464 kg. The flat-eight is a direct descendant of the Porsche Formula 1 engine. ORCA rebuilt the heavily modified car from the ground up — stripped to the last screw — and returned it to its 1967 delivery condition.",
+        ],
+    },
+    "fr": {
+        "proj-910": [
+            "Après plus d’un an de restauration intégrale, la Porsche 910 a fait sa sortie sur le terrain d’entraînement de Birkhau, près de Kirchheim/Teck. Avec seulement 980 mm de hauteur, la voiture paraît presque menue — et dégage pourtant une présence saisissante malgré sa fine carrosserie en fibre de verre.",
+            "Développée de 1966 à 1968 à partir de la 906, la 910 (« Carrera 10 ») était réservée à l’équipe d’usine ; 35 exemplaires environ ont été construits. Son flat-six 2,0 litres refroidi par air (type 901) développe quelque 220 ch à 8 000 tr/min, transmis par une boîte à cinq rapports à différentiel autobloquant.",
+        ],
+        "proj-906": [
+            "Avec la 906 s’ouvre en 1966 l’ère des voitures de course tout en légèreté. Soixante-sept Carrera 6 ont été produites, majoritairement pour des clients privés. Le châssis 126 rejoignit le collectionneur suisse Dr Hans Kühnis et fit ses débuts à la Targa Florio 1966 — la course que Porsche remporta au classement général.",
+            "Après plus de cinq décennies de compétition et un grave accident au Salzburgring en 2020, l’équipe ORCA a entièrement restauré la 906/126 pour la ramener exactement dans son état d’origine de 1966.",
+        ],
+        "proj-550": [
+            "Le prototype Porsche 550 Spyder (châssis 12, 1954) a retrouvé sa livrée d’origine du Mans — argent, numéro 39, avec des marques turquoise sur les arêtes latérales arrière.",
+            "Les pièces d’origine manquantes, comme l’éclairage du numéro de course, ont été reconstituées avec soin, en partie par numérisation CAO et impression 3D. La voiture est aujourd’hui une pièce remarquée du musée du Mans — de retour sur les lieux de son premier triomphe.",
+        ],
+        "proj-917-15": [
+            "La Porsche 917 (châssis 15, 1970) a signé la victoire au classement général des 24 Heures de Daytona avec Pedro Rodríguez et Leo Kinnunen. Aux couleurs Gulf, elle est devenue légendaire grâce au film « Le Mans » avec Steve McQueen.",
+            "Après près de 50 ans passés chez différents collectionneurs, la voiture est arrivée chez ORCA en 2020. Les travaux ont duré plus de trois ans, jusqu’à sa restitution à son propriétaire en janvier 2024, dans son état d’origine de 1970, prête à courir.",
+        ],
+        "proj-911r": [
+            "Cette 911 R appartenait à la légende de la course Jo Siffert. Chez ORCA, elle a fait l’objet d’une restauration minutieuse — peinture refaite à l’identique, en conservant volontairement les marques du temps.",
+            "Un reportage détaillé sur la voiture et sa restauration a fait la une du premier numéro, 01/2023, du magazine suisse « Spirit ».",
+        ],
+        "proj-917-045": [
+            "La restauration esthétique de la 917/045 s’est déroulée entre juillet et septembre 2020. La voiture a couru au Mans en 1971 avec Siffert et Bell, avant de rejoindre, aux couleurs Martini, le musée de l’ACO au Mans en prêt permanent.",
+            "Pour l’exposition « Made for Le Mans », elle a retrouvé sa livrée d’origine de 1971 — y compris les éclats de peinture reproduits fidèlement, tels qu’ils apparaissent en course.",
+        ],
+        "proj-917-spy": [
+            "La voiture d’origine de l’Interserie 1971 — la troisième Porsche 917 reconstruite chez ORCA Restoration. Un chapitre de plus dans l’histoire des 917 de la maison.",
+        ],
+        "proj-910-berg": [
+            "Une voiture d’une rareté exceptionnelle : l’un des deux seuls exemplaires conservés — le second se trouve au musée Porsche. En 1967, elle remporta la course de côte du mont Ventoux, comptant pour le championnat d’Europe de la montagne.",
+            "Allègement extrême : 464 kg seulement. Le flat-huit descend directement du moteur de Formule 1 Porsche. ORCA a entièrement reconstruit cette voiture jusque-là fortement modifiée — démontée jusqu’à la dernière vis — pour la ramener dans son état de livraison de 1967.",
+        ],
+    },
+}
+
+
 # Beschriftung des Laufbands im Hero für Screenreader. Vorgelesen würde sonst
 # die Aneinanderreihung der Fahrzeugnamen, was als Ziel eines Verweises nichts
 # aussagt.
@@ -425,6 +502,48 @@ def head_links(lang: str, page: str) -> str:
     out.append(f'<script type="application/ld+json">{ld}</script>')
 
     return "\n" + "\n".join(out)
+
+
+def uebersetze_projekttexte(s: str, lang: str, page: str) -> str:
+    """Tauscht die deutschen Fahrzeugbeschreibungen gegen die uebersetzten.
+
+    Die Daten stehen als JS-Feld BASE_PROJECTS in der Datei. Statt die langen
+    deutschen Absaetze im Skript zu wiederholen — mit allen Fallen ihrer
+    Maskierung — liest die Funktion sie aus der Datei und ersetzt sie der
+    Reihe nach. Stimmt die Zahl der Absaetze nicht, bricht der Bau ab: Dann
+    hat sich der Export geaendert und die Uebersetzung passt nicht mehr.
+    """
+    anfang = s.find("const BASE_PROJECTS = [")
+    ende = s.find("];", anfang)
+    if anfang < 0 or ende < 0:
+        raise SystemExit(f"{page} [{lang}]: BASE_PROJECTS nicht gefunden")
+    block = s[anfang:ende + 2]
+    neu = block
+
+    gesehen = 0
+    for teil in re.split(r"\\n  \{ id: '", block)[1:]:
+        pid = teil[:teil.find("'")]
+        d = teil.find("desc: [")
+        if d < 0:
+            raise SystemExit(f"{page} [{lang}]: {pid} ohne desc")
+        absaetze = re.findall(r"'((?:[^'\\]|\\.)*)'", teil[d + 7:])
+        ziel = PROJEKT_ABSAETZE[lang].get(pid)
+        if ziel is None:
+            raise SystemExit(f"{page} [{lang}]: keine Uebersetzung fuer {pid}")
+        if len(ziel) != len(absaetze):
+            raise SystemExit(
+                f"{page} [{lang}]: {pid} hat {len(absaetze)} Absaetze, "
+                f"uebersetzt sind {len(ziel)}")
+        for deutsch, fremd in zip(absaetze, ziel):
+            if neu.count("'" + deutsch + "'") != 1:
+                raise SystemExit(
+                    f"{page} [{lang}]: Absatz von {pid} nicht eindeutig")
+            neu = neu.replace("'" + deutsch + "'", "'" + fremd + "'", 1)
+            gesehen += 1
+
+    if gesehen != sum(len(v) for v in PROJEKT_ABSAETZE[lang].values()):
+        raise SystemExit(f"{page} [{lang}]: nicht alle Absaetze ersetzt")
+    return s[:anfang] + neu + s[ende + 2:]
 
 
 def transform(src: str, lang: str, page: str) -> str:
@@ -1112,6 +1231,10 @@ def transform(src: str, lang: str, page: str) -> str:
         '    .orca-leads { align-items: stretch !important; }\\n'
         '  }')
     sub_once(old_media, new_media, "Responsive-Regeln")
+
+    # --- Fahrzeugbeschreibungen uebersetzen -------------------------------
+    if page == "Projects.html" and lang != "de":
+        s = uebersetze_projekttexte(s, lang, page)
 
     # --- Projekttexte auf die Kachel holen --------------------------------
     # Die Beschreibungen der acht Fahrzeuge — zusammen 520 Woerter und der
