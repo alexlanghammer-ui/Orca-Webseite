@@ -475,6 +475,23 @@ def transform(src: str, lang: str, page: str) -> str:
                f'<\\u002Fa>')
         s = re.sub(pattern, lambda _m, n=new: n, s, count=1)
 
+    # --- Laufband: Pause nur fuer Mauszeiger ------------------------------
+    # Das Band haelt an, solange man mit der Maus darueber steht. Auf dem Handy
+    # bleibt ein angetipptes Element aber im Zustand "ueberfahren" — nach einem
+    # Tipp auf das Band (das jetzt zur Projektseite fuehrt) und dem Zurueckgehen
+    # stand es still und lief nicht wieder an. Die Regel gilt deshalb nur noch
+    # dort, wo es einen echten Zeiger gibt; auf Geraeten mit Finger existiert
+    # sie gar nicht und kann das Band folglich nicht anhalten.
+    if page == "index.html":
+        sub_once(
+            '  .orca-ticker:hover .orca-track '
+            '{ animation-play-state: paused; }\\n',
+            '  @media (hover: hover) and (pointer: fine) {\\n'
+            '    .orca-ticker:hover .orca-track '
+            '{ animation-play-state: paused; }\\n'
+            '  }\\n',
+            "Pause des Laufbands nur mit Mauszeiger")
+
     # --- Ueberschriften in aufsteigender Ordnung --------------------------
     # Auf "Ueber uns" folgen dem h1 drei h3, erst danach kommen h2 — eine
     # uebersprungene Stufe. Screenreader lesen die Gliederung daran ab, und
