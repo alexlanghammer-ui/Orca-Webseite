@@ -42,7 +42,10 @@ OG_LOCALE = {"de": "de_DE", "en": "en_GB", "fr": "fr_FR"}
 MENU_LABEL = {"de": "Menü", "en": "Menu", "fr": "Menu"}
 
 # Bild für JSON-LD und Vorschau. Das ursprüngliche hero.jpg existierte nicht.
-SCHEMA_IMAGE = f"{BASE}/images/porsche-917-15.jpg"
+# Der Gulf-917 von vorn ist das praegnanteste Bild des Bestands und dasjenige,
+# das in Suchergebnis und Link-Vorschau erscheinen soll. og-image.jpg ist der
+# 1200x630-Ausschnitt davon.
+SCHEMA_IMAGE = f"{BASE}/images/home-917-front.jpg"
 
 # Kurzbeschreibung im JSON-LD-Block, je Sprache.
 SCHEMA_DESC = {
@@ -407,10 +410,26 @@ TICKER_LABEL = {
     "fr": "Voir tous les projets",
 }
 
+# Adressen der alten WordPress-Seite, die unter orca.gmbh lief. Google hat sie
+# weiter im Index und zeigt sie als Zusatzverweise unter dem Suchergebnis an —
+# sie liefen bis jetzt auf die 404-Seite. Ermittelt ueber eine Suche nach
+# site:orca.gmbh. Ziel ist jeweils die inhaltlich entsprechende neue Seite.
+ALT_ADRESSEN = {
+    "projekte/": "Projects.html:de",
+    "projekte-2/": "Projects.html:en",
+    "kontakt/": "Contact.html:de",
+    "impressum/": "Legal.html:de",
+    "datenschutz/": "Legal.html:de",
+    "about-2/": "About.html:en",
+    "startseite/": "index.html:en",
+    "startseite-2-2/": "index.html:en",
+    "startseite-2-3/": "index.html:fr",
+}
+
 OG_IMAGE_ALT = {
-    "de": "Historischer Porsche-Rennwagen auf einer Passstrasse",
-    "en": "Historic Porsche race car on a mountain pass road",
-    "fr": "Voiture de course Porsche historique sur une route de col",
+    "de": "Porsche 917 in Gulf-Lackierung, Frontansicht",
+    "en": "Porsche 917 in Gulf livery, front view",
+    "fr": "Porsche 917 aux couleurs Gulf, vue de face",
 }
 
 
@@ -1533,6 +1552,28 @@ def main() -> None:
                                                             encoding="utf-8")
             stummel += 1
     print(f"  {stummel} Weiterleitungen von den alten .html-Adressen")
+
+    # --- Weiterleitungen der alten WordPress-Adressen ---------------------
+    # Google fuehrt sie weiter als Zusatzverweise unter dem Suchergebnis; sie
+    # landeten auf der 404-Seite. Derselbe Stummel wie bei den .html-Adressen:
+    # canonical nennt das Ziel, refresh und Skript schicken den Besucher hin.
+    for alt_pfad, ziel in ALT_ADRESSEN.items():
+        seite, ziel_lang = ziel.split(":")
+        ordner = root / alt_pfad
+        ordner.mkdir(parents=True, exist_ok=True)
+        ziel_pfad = link_for(ziel_lang, seite)
+        (ordner / "index.html").write_text(
+            "<!doctype html>\n"
+            f'<html lang="{ziel_lang}">\n<head>\n<meta charset="utf-8">\n'
+            f'<link rel="canonical" href="{url_for(ziel_lang, seite)}">\n'
+            f'<meta http-equiv="refresh" content="0; url={ziel_pfad}">\n'
+            "<title>ORCA Restoration GmbH</title>\n</head>\n<body>\n"
+            f'<p>Diese Seite liegt jetzt unter <a href="{ziel_pfad}">'
+            f'{BASE}{ziel_pfad}</a>.</p>\n'
+            f'<script>location.replace("{ziel_pfad}");</script>\n'
+            "</body>\n</html>\n",
+            encoding="utf-8")
+    print(f"  {len(ALT_ADRESSEN)} Weiterleitungen von der alten WordPress-Seite")
 
     # --- 404-Seite --------------------------------------------------------
     # GitHub Pages liefert unter /404.html eine eigene Seite aus, wenn nichts
