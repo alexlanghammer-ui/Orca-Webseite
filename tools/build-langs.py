@@ -410,6 +410,67 @@ TICKER_LABEL = {
     "fr": "Voir tous les projets",
 }
 
+# Neuntes Projekt: der BMW M3 Touring, den ORCA gemeinsam mit dem Team
+# Schneider im Auftrag der Mast-Jaegermeister SE aufgebaut hat. Er steckt nicht
+# im Export, wird also hier eingesetzt. Die Angaben stammen aus der
+# Veroeffentlichung zum Fahrzeug: Aufbau durch ORCA und Team Schneider,
+# Auftraggeberin Mast-Jaegermeister SE, Gestaltung von Blackfish Graphics,
+# 2,5-Liter-Reihensechszylinder, erstmals gezeigt beim Ultrace in Danzig.
+# Bewusst keine Angaben zu Dauer oder Umfang der Arbeiten — die sind nicht
+# belegt.
+NEUES_PROJEKT = {
+    "id": "proj-e30-rennwagon",
+    "src": "images/bmw-e30-m3-jaegermeister.jpg",
+    "alt": "BMW M3 E30 als Kombi in oranger Rennmeister-Lackierung, Seitenansicht",
+    "title": "BMW M3 Touring",
+    "year": 2026,
+    "placeholder": "BMW M3 Touring – Rennwagon",
+    "meta": {"de": "Rennwagon", "en": "Rennwagon", "fr": "Rennwagon"},
+    "desc": {
+        "de": [
+            "Ein BMW M3 der Baureihe E30 als Kombi — eine Karosserieform, die "
+            "BMW nie gebaut hat. Der Rennwagon entstand bei ORCA Restoration "
+            "gemeinsam mit dem Team Schneider im Auftrag der Mast-Jägermeister "
+            "SE und wurde 2026 beim Ultrace im polnischen Danzig erstmals "
+            "gezeigt.",
+            "Anders als die Limousine, die in den Achtzigern die Deutsche "
+            "Tourenwagen-Meisterschaft prägte, ist dieser E30 nicht auf "
+            "Rundenzeiten ausgelegt, sondern als Hommage an die Fahrzeugkultur "
+            "gedacht. Unter der Haube arbeitet ein "
+            "2,5-Liter-Reihensechszylinder; die Lackierung stammt von "
+            "Blackfish Graphics und soll nicht die letzte bleiben. Zu sehen "
+            "ist der Wagen künftig auf Veranstaltungen in ganz Europa.",
+        ],
+        "en": [
+            "A BMW M3 of the E30 generation as an estate — a body style BMW "
+            "never built. The Rennwagon was created at ORCA Restoration "
+            "together with Team Schneider on behalf of Mast-Jägermeister SE "
+            "and shown for the first time at Ultrace in Gdańsk, Poland, in "
+            "2026.",
+            "Unlike the saloon that shaped the German Touring Car Championship "
+            "in the eighties, this E30 is not built to chase lap times but "
+            "conceived as a tribute to car culture. A 2.5-litre inline-six "
+            "sits under the bonnet; the livery comes from Blackfish Graphics "
+            "and is not meant to be the last. The car will be shown at events "
+            "across Europe.",
+        ],
+        "fr": [
+            "Une BMW M3 de la génération E30 en break — une carrosserie que "
+            "BMW n’a jamais produite. Le Rennwagon a été réalisé chez ORCA "
+            "Restoration avec le Team Schneider pour le compte de "
+            "Mast-Jägermeister SE et présenté pour la première fois à "
+            "l’Ultrace de Gdańsk, en Pologne, en 2026.",
+            "Contrairement à la berline qui a marqué le championnat allemand "
+            "des voitures de tourisme dans les années quatre-vingt, cette E30 "
+            "n’est pas conçue pour les chronos mais comme un hommage à la "
+            "culture automobile. Un six-cylindres en ligne de 2,5 litres "
+            "occupe le compartiment moteur ; la livrée signée Blackfish "
+            "Graphics ne sera pas la dernière. La voiture sera présentée lors "
+            "d’événements dans toute l’Europe.",
+        ],
+    },
+}
+
 # Adressen der alten WordPress-Seite, die unter orca.gmbh lief. Google hat sie
 # weiter im Index und zeigt sie als Zusatzverweise unter dem Suchergebnis an —
 # sie liefen bis jetzt auf die 404-Seite. Ermittelt ueber eine Suche nach
@@ -523,6 +584,10 @@ def head_links(lang: str, page: str) -> str:
     return "\n" + "\n".join(out)
 
 
+for _lang in ("en", "fr"):
+    PROJEKT_ABSAETZE[_lang][NEUES_PROJEKT["id"]] = NEUES_PROJEKT["desc"][_lang]
+
+
 def uebersetze_projekttexte(s: str, lang: str, page: str) -> str:
     """Tauscht die deutschen Fahrzeugbeschreibungen gegen die uebersetzten.
 
@@ -585,6 +650,33 @@ def transform(src: str, lang: str, page: str) -> str:
     if lang != "de":
         sub_once("state = { lang: 'de'", f"state = {{ lang: '{lang}'",
                  "Sprachzustand")
+
+    # --- Neuntes Projekt in die Liste aufnehmen ---------------------------
+    # Der Eintrag wird an das Ende von BASE_PROJECTS gehaengt und die
+    # Kennzeichnung an alle drei metas-Listen, die nach Position zugeordnet
+    # sind. Beides vor der Umschreibung der Bildpfade, damit der Pfad denselben
+    # Weg nimmt wie die uebrigen. Die deutschen Absaetze kommen hier hinein und
+    # werden anschliessend wie die uebrigen uebersetzt.
+    if page == "Projects.html":
+        n = NEUES_PROJEKT
+        absaetze = ",\\n    ".join("'" + a + "'" for a in n["desc"]["de"])
+        eintrag = (
+            "  { id: '" + n["id"] + "', src: '" + n["src"] + "', "
+            "alt: '" + n["alt"] + "', title: '" + n["title"] + "', "
+            "year: " + str(n["year"]) + ", placeholder: '" + n["placeholder"] + "', "
+            "desc: [\\n    " + absaetze + ",\\n  ] },\\n"
+        )
+        sub_once("\\n];\\n\\nclass Component extends DCLogic",
+                 "\\n" + eintrag + "];\\n\\nclass Component extends DCLogic",
+                 "neues Projekt in BASE_PROJECTS")
+        for sprache, letzte in (("de", "Bergrennwagen"), ("en", "Hill-Climb Racer"),
+                                ("fr", "Voiture de côte")):
+            sub_once("'" + letzte + "']",
+                     "'" + letzte + "', '" + n["meta"][sprache] + "']",
+                     f"Kennzeichnung {sprache}")
+        sub_once('hint-placeholder-count=\\"8\\"',
+                 'hint-placeholder-count=\\"9\\"',
+                 "Zahl der Platzhalter")
 
     # --- Pfade zu Bildern und Videos: von der Wurzel aus ------------------
     # Die Seiten liegen in unterschiedlichen Tiefen (/, /about/, /en/about/).
